@@ -1,0 +1,122 @@
+@page
+@model Drevenka.Web.Pages.Products.CreateModel
+@{
+    ViewData["Title"] = "Nový produkt";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a asp-page="/Index">Sklad Dřevěnka</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Index">Katalog produktů</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Nový produkt</li>
+            </ol>
+        </nav>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h2 class="h4 mb-0 fw-bold text-dark">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>Přidat nový produkt do nabídky
+                </h2>
+                <span class="text-muted small">Vyplňte základní údaje o dřevěné hračce. Kód produktu (SKU) musí být v systému jedinečný.</span>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" id="createProductForm">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm" role="alert"></div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-5">
+                            <label asp-for="Input.Code" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-upc-scan"></i></span>
+                                <input asp-for="Input.Code" class="form-control font-monospace text-uppercase" placeholder="např. KAC-002" autofocus />
+                            </div>
+                            <span asp-validation-for="Input.Code" class="text-danger small"></span>
+                            <div class="form-text small">Unikátní skladový identifikátor (SKU). Automaticky se převede na velká písmena.</div>
+                        </div>
+
+                        <div class="col-12 col-md-7">
+                            <label asp-for="Input.Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.Name" class="form-control" placeholder="např. Dřevěná káča dvoubarevná" />
+                            <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Input.Description" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Input.Description" class="form-control" rows="3" placeholder="Uveďte podrobnější popis, použitý materiál (např. masivní dub/buk), povrchovou úpravu apod."></textarea>
+                            <span asp-validation-for="Input.Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label asp-for="Input.PurchasePrice" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <input asp-for="Input.PurchasePrice" type="number" step="0.50" min="0" class="form-control text-end font-monospace" id="purchasePriceInput" oninput="calculateMargin()" />
+                                <span class="input-group-text bg-light">Kč</span>
+                            </div>
+                            <span asp-validation-for="Input.PurchasePrice" class="text-danger small"></span>
+                            <div class="form-text small">Nákupní / výrobní cena bez DPH.</div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label asp-for="Input.SellingPrice" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <input asp-for="Input.SellingPrice" type="number" step="1.00" min="0" class="form-control text-end font-monospace" id="sellingPriceInput" oninput="calculateMargin()" />
+                                <span class="input-group-text bg-light">Kč</span>
+                            </div>
+                            <span asp-validation-for="Input.SellingPrice" class="text-danger small"></span>
+                            <div class="form-text small">Doporučená prodejní cena e-shopu.</div>
+                        </div>
+
+                        <!-- Živý náhled kalkulace marže -->
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded border d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small">Předpokládaná marže na kusu:</div>
+                                    <div class="fw-bold fs-5 text-dark" id="marginKcs">0,00 Kč</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="text-muted small">Procentuální přirážka:</div>
+                                    <span class="badge bg-success fs-6" id="marginPercent">0 %</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <a asp-page="./Index" class="btn btn-outline-secondary px-3">
+                            <i class="bi bi-arrow-left me-1"></i> Zpět do katalogu
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Uložit produkt
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function calculateMargin() {
+            const purchase = parseFloat(document.getElementById('purchasePriceInput').value) || 0;
+            const selling = parseFloat(document.getElementById('sellingPriceInput').value) || 0;
+            const margin = selling - purchase;
+            const percent = purchase > 0 ? (margin / purchase) * 100 : 0;
+
+            document.getElementById('marginKcs').innerText = margin.toFixed(2) + ' Kč';
+            const badge = document.getElementById('marginPercent');
+            badge.innerText = (percent >= 0 ? '+' : '') + percent.toFixed(0) + ' %';
+            if (percent < 0) {
+                badge.className = 'badge bg-danger fs-6';
+            } else if (percent < 30) {
+                badge.className = 'badge bg-warning text-dark fs-6';
+            } else {
+                badge.className = 'badge bg-success fs-6';
+            }
+        }
+        calculateMargin();
+    </script>
+}

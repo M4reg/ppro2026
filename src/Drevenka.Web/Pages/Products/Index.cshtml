@@ -1,0 +1,215 @@
+@page
+@model Drevenka.Web.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "Katalog produktů";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-page="/Index">Sklad Dřevěnka</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Katalog produktů</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-0 fw-bold text-dark">
+            <i class="bi bi-box-seam text-warning me-2"></i>Katalog dřevěných hraček
+        </h1>
+        <p class="text-muted small mb-0">Evidence položek sortimentu Dřevěnka s.r.o. (nahrazuje původní Excel se 400 položkami).</p>
+    </div>
+    <div>
+        <a asp-page="./Create" class="btn btn-primary px-3 py-2 shadow-sm fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Nový produkt
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@Model.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+<!-- Vyhledávací a filtrační lišta -->
+<div class="card border-0 shadow-sm mb-4 bg-light">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-6 col-lg-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" asp-for="SearchTerm" class="form-control border-start-0 ps-0" placeholder="Hledat podle názvu nebo SKU kódu (např. KAC, vláček)..." />
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-3">
+                <div class="form-check form-switch pt-1">
+                    <input class="form-check-input" type="checkbox" asp-for="OnlyActive" id="onlyActiveSwitch" onchange="this.form.submit()" />
+                    <label class="form-check-label small" for="onlyActiveSwitch">Jen aktivní nabídka</label>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-secondary w-100 fw-semibold">Filtrovat</button>
+                @if (!string.IsNullOrWhiteSpace(Model.SearchTerm) || Model.OnlyActive)
+                {
+                    <a asp-page="./Index" class="btn btn-outline-secondary" title="Zrušit filtr"><i class="bi bi-x-lg"></i></a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Statistiky výsledků -->
+<div class="d-flex justify-content-between align-items-center mb-3 text-muted small">
+    <span>Nalezeno produktů: <strong>@Model.Products.Count</strong></span>
+    <span class="d-none d-md-inline"><i class="bi bi-info-circle me-1"></i>Kliknutím na detail uvidíte kalkulaci marže a podrobnosti.</span>
+</div>
+
+@if (!Model.Products.Any())
+{
+    <div class="card border-0 shadow-sm p-5 text-center my-4">
+        <div class="display-6 text-muted mb-3"><i class="bi bi-inbox"></i></div>
+        <h4 class="fw-bold">Nebyly nalezeny žádné produkty</h4>
+        <p class="text-muted">Zkuste upravit vyhledávací kritéria nebo založte nový produkt.</p>
+        <div class="mt-2">
+            <a asp-page="./Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Vytvořit první produkt</a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Desktopová tabulka -->
+    <div class="card border-0 shadow-sm d-none d-lg-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-uppercase small text-muted">
+                    <tr>
+                        <th style="width: 120px;">Kód (SKU)</th>
+                        <th>Název a popis</th>
+                        <th class="text-end" style="width: 130px;">Nákupní cena</th>
+                        <th class="text-end" style="width: 130px;">Prodejní cena</th>
+                        <th class="text-end" style="width: 110px;">Marže</th>
+                        <th class="text-center" style="width: 100px;">Stav</th>
+                        <th class="text-end" style="width: 180px;">Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Products)
+                    {
+                        var margin = item.SellingPrice - item.PurchasePrice;
+                        var marginPercent = item.PurchasePrice > 0 ? (margin / item.PurchasePrice) * 100 : 100;
+                        <tr class="@(!item.IsActive ? "opacity-75 bg-light" : "")">
+                            <td>
+                                <span class="badge bg-dark-subtle text-dark font-monospace fw-semibold px-2 py-1">@item.Code</span>
+                            </td>
+                            <td>
+                                <a asp-page="./Details" asp-route-id="@item.Id" class="fw-bold text-decoration-none text-dark d-block">
+                                    @item.Name
+                                </a>
+                                @if (!string.IsNullOrWhiteSpace(item.Description))
+                                {
+                                    <span class="text-muted small text-truncate d-block" style="max-width: 380px;">@item.Description</span>
+                                }
+                            </td>
+                            <td class="text-end font-monospace">@item.PurchasePrice.ToString("C2")</td>
+                            <td class="text-end font-monospace fw-bold text-success">@item.SellingPrice.ToString("C2")</td>
+                            <td class="text-end small">
+                                <span class="badge @(marginPercent >= 100 ? "bg-success-subtle text-success" : "bg-warning-subtle text-dark")">
+                                    +@marginPercent.ToString("F0") %
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge bg-success">Aktivní</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Neaktivní</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-outline-secondary" title="Detail"><i class="bi bi-eye"></i></a>
+                                    <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Upravit"><i class="bi bi-pencil"></i></a>
+                                    @if (item.IsActive)
+                                    {
+                                        <form method="post" asp-page-handler="Deactivate" asp-route-id="@item.Id" class="d-inline" onsubmit="return confirm('Opravdu chcete produkt deaktivovat?');">
+                                            <button type="submit" class="btn btn-outline-danger" title="Deaktivovat"><i class="bi bi-pause-circle"></i></button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="Activate" asp-route-id="@item.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-success" title="Aktivovat"><i class="bi bi-play-circle"></i></button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Mobilní / tabletové zobrazení (Karty optimalizované pro skladníky) -->
+    <div class="d-lg-none row g-3">
+        @foreach (var item in Model.Products)
+        {
+            var margin = item.SellingPrice - item.PurchasePrice;
+            var marginPercent = item.PurchasePrice > 0 ? (margin / item.PurchasePrice) * 100 : 100;
+            <div class="col-12 col-md-6">
+                <div class="card border-0 shadow-sm h-100 @(!item.IsActive ? "opacity-75 bg-light" : "")">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-dark font-monospace">@item.Code</span>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success-subtle text-success">Aktivní</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary">Neaktivní</span>
+                            }
+                        </div>
+                        <h5 class="card-title fw-bold mb-1">
+                            <a asp-page="./Details" asp-route-id="@item.Id" class="text-decoration-none text-dark">@item.Name</a>
+                        </h5>
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                        {
+                            <p class="card-text text-muted small mb-3">@item.Description</p>
+                        }
+                        <div class="bg-light p-2 rounded mb-3">
+                            <div class="row text-center">
+                                <div class="col-6 border-end">
+                                    <div class="text-muted small">Nákup</div>
+                                    <div class="fw-semibold">@item.PurchasePrice.ToString("C2")</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-muted small">Prodej</div>
+                                    <div class="fw-bold text-success">@item.SellingPrice.ToString("C2")</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-info-subtle text-dark">Marže: +@marginPercent.ToString("F0") %</span>
+                            <div class="btn-group btn-group-sm">
+                                <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Detail</a>
+                                <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Upravit</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Dřevěnka s.r.o. | Sklad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Drevenka.Web.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .font-monospace {
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+        .navbar-brand-wood {
+            font-weight: 700;
+            color: #8B4513 !important;
+            letter-spacing: -0.3px;
+        }
+        .navbar-brand-wood:hover {
+            color: #5c2d0c !important;
+        }
+        .bg-wood-subtle {
+            background-color: #fff9f2;
+        }
+        .extra-small {
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header>
+        <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom shadow-sm py-2">
+            <div class="container">
+                <a class="navbar-brand navbar-brand-wood d-flex align-items-center gap-2" asp-area="" asp-page="/Index">
+                    <span class="fs-4"><i class="bi bi-box-seam-fill text-warning"></i></span>
+                    <div>
+                        <span class="d-block lh-1">Dřevěnka s.r.o.</span>
+                        <small class="text-muted fw-normal fs-6" style="font-size: 0.7rem !important;">Skladový systém (PPRO)</small>
+                    </div>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar"
+                        aria-expanded="false" aria-label="Přepnout navigaci">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0 ms-md-3">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" asp-area="" asp-page="/Index">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" asp-area="" asp-page="/Products/Index">
+                                <i class="bi bi-grid me-1"></i> Katalog produktů
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" asp-area="" asp-page="/Products/Create">
+                                <i class="bi bi-plus-circle me-1"></i> Nový produkt
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-light text-dark border font-monospace small d-none d-lg-inline">
+                            <i class="bi bi-database me-1 text-success"></i>PostgreSQL
+                        </span>
+                        <a href="https://github.com/M4reg/ppro2026" target="_blank" class="btn btn-sm btn-outline-dark">
+                            <i class="bi bi-github me-1"></i> GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container py-4 flex-grow-1">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top bg-white py-3 text-muted mt-auto">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center small gap-2">
+            <div>
+                &copy; 2026 - <strong>Dřevěnka s.r.o.</strong> (Skladový systém) &bull; Pokročilé programování (PPRO ZS 2026/2027)
+            </div>
+            <div>
+                Autor: <strong>Marek Ludvík</strong> &bull; Klient: <strong>Petr Doležal</strong>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

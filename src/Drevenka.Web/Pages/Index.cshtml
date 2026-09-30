@@ -1,0 +1,117 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Skladový systém Dřevěnka s.r.o.";
+}
+
+<div class="p-5 mb-4 bg-light rounded-3 border shadow-sm" style="background: linear-gradient(135deg, #fff9f0 0%, #f4ede2 100%);">
+    <div class="container-fluid py-2">
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <span class="badge bg-warning text-dark px-3 py-2 fs-6 fw-bold">Zadání B: Sklad pro malý e-shop</span>
+            <span class="badge bg-secondary-subtle text-secondary">PPRO ZS 2026/2027</span>
+        </div>
+        <h1 class="display-5 fw-bold text-dark mb-3">
+            <i class="bi bi-tree text-success me-2"></i>Dřevěnka s.r.o. – Skladový systém
+        </h1>
+        <p class="col-md-9 fs-5 text-secondary">
+            Funkční demo pro klienta pana <strong>Petra Doležala</strong>. Tento modul demonstruje přechod z původního sdíleného Excelu (se 400 položkami) do moderní třívrstvé aplikace s relační databází.
+        </p>
+        <div class="d-flex flex-wrap gap-2 pt-2">
+            <a asp-page="/Products/Index" class="btn btn-primary btn-lg px-4 fw-semibold shadow-sm">
+                <i class="bi bi-box-seam me-2"></i> Otevřít katalog produktů
+            </a>
+            <a asp-page="/Products/Create" class="btn btn-outline-dark btn-lg px-4">
+                <i class="bi bi-plus-circle me-2"></i> Přidat produkt
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Metriky dema -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Položky v evidenci</div>
+                        <div class="display-6 fw-bold text-dark mt-1">@Model.TotalProductsCount</div>
+                        <div class="text-success small mt-1"><i class="bi bi-check-circle me-1"></i>@Model.ActiveProductsCount aktivních</div>
+                    </div>
+                    <div class="fs-1 text-primary-subtle"><i class="bi bi-boxes"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Průměrná marže / zisk</div>
+                        <div class="display-6 fw-bold text-success mt-1">@Model.AverageMargin.ToString("C0")</div>
+                        <div class="text-muted small mt-1">Rozdíl prodejní a nákupní ceny</div>
+                    </div>
+                    <div class="fs-1 text-success-subtle"><i class="bi bi-graph-up-arrow"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm h-100 border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Skladová architektura</div>
+                        <div class="h4 fw-bold text-dark mt-2 mb-1">PostgreSQL v Dockeru</div>
+                        <div class="text-muted small">Třívrstvé řešení se závislostmi jedním směrem</div>
+                    </div>
+                    <div class="fs-1 text-warning-subtle"><i class="bi bi-database-check"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rychlý náhled posledních produktů -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0"><i class="bi bi-stars text-warning me-2"></i>Ukázkový sortiment Dřevěnky</h5>
+        <a asp-page="/Products/Index" class="btn btn-sm btn-outline-primary">Zobrazit vše</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small text-muted">
+                <tr>
+                    <th>Kód</th>
+                    <th>Produkt</th>
+                    <th class="text-end">Nákup</th>
+                    <th class="text-end">Prodej</th>
+                    <th class="text-center">Stav</th>
+                    <th class="text-end">Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.RecentProducts)
+                {
+                    <tr>
+                        <td><span class="badge bg-dark-subtle text-dark font-monospace">@p.Code</span></td>
+                        <td class="fw-semibold">@p.Name</td>
+                        <td class="text-end font-monospace">@p.PurchasePrice.ToString("C2")</td>
+                        <td class="text-end font-monospace text-success fw-bold">@p.SellingPrice.ToString("C2")</td>
+                        <td class="text-center">
+                            <span class="badge @(p.IsActive ? "bg-success" : "bg-secondary")">@(p.IsActive ? "Aktivní" : "Neaktivní")</span>
+                        </td>
+                        <td class="text-end">
+                            <a asp-page="/Products/Details" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

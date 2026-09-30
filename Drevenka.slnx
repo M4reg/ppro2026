@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Drevenka.Domain/Drevenka.Domain.csproj" />
+    <Project Path="src/Drevenka.Infrastructure/Drevenka.Infrastructure.csproj" />
+    <Project Path="src/Drevenka.Web/Drevenka.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Drevenka.Domain.Tests/Drevenka.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

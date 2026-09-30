@@ -145,39 +145,60 @@ erDiagram
 
 | Požadavek z kurzu PPRO | Stav v projektu | Způsob řešení |
 | :--- | :---: | :--- |
-| **Třívrstvá architektura** | Splněno (v návrhu) | Přísně oddělená Prezentační, Doménová a Datová vrstva se závislostmi jedním směrem. |
-| **Relační databáze v Dockeru** | Splněno (v návrhu) | Databáze (PostgreSQL) běží v Docker kontejneru definovaném v `docker-compose.yml`. |
-| **Databázové migrace** | Splněno (v návrhu) | Řízení schématu verzovanými migračními skripty. |
-| **Minimálně 5 entit** | Splněno (v návrhu) | Navrženo 11 entit plně pokrývajících doménu skladu. |
-| **Alespoň jedna vazba M:N** | Splněno (v návrhu) | Realizována vazba mezi `Product` a `Category` (a vazby objednávek). |
-| **Automatizované testy** | Splněno (v návrhu) | Testy klíčových obchodních pravidel (výdej nad zásobu, neměnnost cen, audit). |
-| **Spuštění přes docker compose up**| Splněno (v návrhu) | Projekt bude plně spustitelný jediným příkazem `docker compose up`. |
-| **Technická dokumentace** | Splněno | [README.md](file:///u:/ppro2026/README.md) slouží jako jediný zdroj pravdy. |
-| **Syntetická data bez hesel** | Splněno | V repozitáři jsou pouze anonymní testovací data, citlivé údaje řešeny přes environmentální proměnné. |
+| **Třívrstvá architektura** | **Splněno** | Přísně oddělená doména (`Drevenka.Domain`), datová vrstva (`Drevenka.Infrastructure`) a prezentační vrstva (`Drevenka.Web`) se závislostmi jedním směrem. |
+| **Relační databáze v Dockeru** | **Splněno** | Databáze PostgreSQL 16 kontejnerizována v `docker-compose.yml` se zdravotní kontrolou (healthcheck). |
+| **Databázové migrace** | **Splněno** | Verzované migrace řízené přes Entity Framework Core (`20260930142056_InitialCreateProduct`). |
+| **Minimálně 5 entit** | V realizaci (demo: 1. entita `Product`) | Navrženo 11 entit; v úvodním demu plně zprovozněna klíčová entita `Product` s validacemi cen a unikátností SKU kódů. |
+| **Alespoň jedna vazba M:N** | V návrhu | Navržena vazba `Product` ↔ `Category` (bude realizována v další fázi). |
+| **Automatizované testy** | **Splněno** | 14 automatizovaných jednotkových testů v `tests/Drevenka.Domain.Tests` pokrývajících doménová pravidla a aplikační logiku. |
+| **Spuštění přes docker compose up**| **Splněno** | Celý systém (DB + Web) je sestavitelný a spustitelný jediným příkazem `docker compose up --build`. |
+| **Technická dokumentace** | **Splněno** | [README.md](file:///u:/ppro2026/README.md) slouží jako jediný zdroj pravdy a průběžně se aktualizuje. |
+| **Syntetická data bez hesel** | **Splněno** | Inicializační seeder automaticky vkládá 5 syntetických dřevěných hraček (káča, vláček, kostky, koník, pexeso); hesla nejsou uložena v kódu. |
 
 ---
 
 ## 6. Provoz a spuštění projektu
 
 ### Požadavky
-- Docker & Docker Compose
+- .NET 10 SDK (pro lokální vývoj a testy)
+- Docker & Docker Compose (pro kontejnerizovaný běh)
 - Git
 
-### Spuštění
+### Varianta A: Spuštění celého řešení v Dockeru (doporučeno pro obhajobu)
 ```bash
-# Klonování repozitáře
-git clone https://github.com/M4reg/ppro2026.git
-cd ppro2026
-
-# Spuštění celého systému včetně databáze a migrací
+# Spuštění PostgreSQL i webové aplikace jedním příkazem
 docker compose up --build
+
+# Aplikace je dostupná na:
+# http://localhost:5000
+```
+
+### Varianta B: Spuštění automatických testů
+```bash
+# Spuštění kompletní sady jednotkových testů domény a aplikační logiky
+dotnet test Drevenka.slnx
+```
+
+### Varianta C: Lokální běh webové aplikace
+```bash
+# Spuštění webového rozhraní na lokálním vývojovém serveru
+dotnet run --project src/Drevenka.Web/Drevenka.Web.csproj
 ```
 
 ---
 
 ## 7. Deník změn a rozhodnutí (Changelog & Progress Log)
 
-- **2026-09-30:**
+- **2026-09-30 (Fáze 2: Implementace funkčního dema nad entitou Produkt):**
+  - Schválen implementační plán úvodního dema ([demo_implementation_plan.md](file:///C:/Users/ludvima3/.gemini/antigravity-ide/brain/363692ef-ecf3-40b8-a3fe-b99ad1c923dc/demo_implementation_plan.md)).
+  - Vytvořeno .NET 10 solution `Drevenka.slnx` se striktní třívrstvou architekturou:
+    - `Drevenka.Domain` (čistá doménová logika, entita `Product`, rozhraní repozitáře, doménová služba `ProductService`, doménové výjimky).
+    - `Drevenka.Infrastructure` (Entity Framework Core, PostgreSQL mapování, `DrevenkaDbContext`, integritní omezení nezáporných cen, `ProductRepository`, `DatabaseSeeder`).
+    - `Drevenka.Web` (ASP.NET Core Razor Pages, ergonomické responzivní UI pro skladníky i manažera, správa a kalkulace marže).
+    - `Drevenka.Domain.Tests` (14 jednotkových testů xUnit + FluentAssertions pokrývajících validace SKU, nezápornost cen a unikátnost kódů).
+  - Vytvořen `Dockerfile` a `docker-compose.yml` integrující PostgreSQL 16 a webovou aplikaci se zdravou kontrolou `healthcheck`.
+  - Vygenerována a zavedena úvodní migrace `InitialCreateProduct` a automatické seedování 5 syntetických dřevěných hraček.
+- **2026-09-30 (Fáze 1: Inicializace a analýza zadání):**
   - Výběr Zadání B (Sklad pro malý e-shop – Dřevěnka s.r.o.).
   - Inicializace Git repozitáře a propojení na GitHub `https://github.com/M4reg/ppro2026.git`.
   - Vytvoření [AGENTS.md](file:///u:/ppro2026/AGENTS.md) s pravidly pro AI asistenta (zákaz automatického pushování, povinné přepínače `-m`, synchronizace dokumentace).
