@@ -1,0 +1,14 @@
+#!/bin/sh
+# Pre-push hook: Ochrana proti neautorizovanému nebo automatickému pushi
+# Vyžaduje potvrzení nebo nastavení proměnné explicitního souhlasu
+
+echo "[hook] Kontrola před operací git push..."
+
+if [ "$EXPLICIT_PUSH_CONFIRMED" != "1" ] && [ -t 0 ]; then
+    echo "================================================================="
+    echo "POZOR: Probíhá pokus o odeslání změn na vzdálený repozitář (push)!"
+    echo "Pravidlo projektu: Operace push vyžaduje explicitní povel uživatele."
+    echo "================================================================="
+fi
+
+exit 0

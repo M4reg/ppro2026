@@ -1,0 +1,25 @@
+#!/bin/sh
+# Pre-commit hook: Kontrola aktualizace technické dokumentace (README.md)
+# README.md je jediným zdrojem pravdy pro projekt PPRO (Zadání B).
+
+echo "[hook] Kontrola dokumentace před commitem..."
+
+# Kontrola existence README.md
+if [ ! -f "README.md" ]; then
+    echo "CHYBA: Soubor README.md neexistuje! README.md je jediným zdrojem pravdy a musí být přítomen."
+    exit 1
+fi
+
+# Zjištění, jaké soubory jsou připraveny ke commitu (staged)
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Pokud commitujeme pouze samotný README.md nebo AGENTS.md, je to v pořádku
+if echo "$STAGED_FILES" | grep -qE "^README\.md$"; then
+    echo "[hook] README.md je součástí commitu - dokumentace aktualizována. OK."
+    exit 0
+fi
+
+# Pokud jsou commitovány změny kódu/architektury bez README.md, upozorníme
+echo "[hook] UPOZORNĚNÍ: Provádíte commit bez současné úpravy README.md."
+echo "[hook] Ujistěte se, že všechny architektonické změny, rozhodnutí a postup prací jsou v README.md zaznamenány."
+exit 0
