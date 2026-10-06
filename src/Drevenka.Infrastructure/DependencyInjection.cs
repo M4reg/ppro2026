@@ -13,7 +13,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<DrevenkaDbContext>(options =>
         {
-            options.UseNpgsql(connectionString, b =>
+            options.UseSqlite(connectionString, b =>
             {
                 b.MigrationsAssembly(typeof(DrevenkaDbContext).Assembly.FullName);
             });
