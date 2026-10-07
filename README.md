@@ -197,6 +197,9 @@ dotnet run --project src/Drevenka.Web/Drevenka.Web.csproj
   - **Nové stylování drobečkové navigace (Breadcrumbs)**: Zavedena komponenta `.custom-breadcrumb-bar` s čistým vizuálem a oddělovači.
   - **Rozšířené vyhledávání a filtrování**: Přidáno oddělené tlačítko pro vyhledávání i filtry; vyhledávání nyní podporuje zadání více SKU kódů najednou (např. oddělených čárkou). Doplněno filtrování podle stavu a cenového rozpětí i řazení.
   - **Nová paleta barev a řemeslný workshop vizuál**: Aplikován nový čistý styl postavený na barvách `#E3DCD2` (písek/dřevo), `#CC8B65` (terakota), `#013328` (lesní zeleň) a `#100C0D` (eben). Odstraněny generické kulaté bubliny a gradienty, nahrazeno poctivou pevnou geometrií a řemeslnými bloky.
+  - **Decentní stavové indikátory (Navbar a Footer)**: Nahrazen křiklavý zelený text jemným řemeslným odznakem `.craft-status-tag` s tlumeným signálním puntíkem a sladěnou typografií pro „Sklad online“ i „V provozu“.
+  - **Oprava mobilního hamburger menu**: Mobilní navigace má sjednocené odsazení a plnohodnotný uživatelský profil se jménem a rolí (`Petr Doležal (Skladník)`), namísto prázdné osamocené ikonky.
+  - **Unifikace šířky stránek a drobečkové navigace**: Všechny stránky i drobečková navigace (`.custom-breadcrumb-bar`) jsou zarovnány do jednotného kontejneru `.app-container` (max. šířka 1140px), čímž bylo odstraněno nežádoucí přeskakování a měnění rozměrů při navigaci mezi katalogem, detailem produktu a formuláři.
 
 - **2026-09-30 (Fáze 2: Implementace funkčního dema nad entitou Produkt):**
   - Schválen implementační plán úvodního dema ([demo_implementation_plan.md](file:///C:/Users/ludvima3/.gemini/antigravity-ide/brain/363692ef-ecf3-40b8-a3fe-b99ad1c923dc/demo_implementation_plan.md)).

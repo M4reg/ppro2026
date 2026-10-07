@@ -6,93 +6,112 @@
     var marginPercent = Model.Product.PurchasePrice > 0 ? (margin / Model.Product.PurchasePrice) * 100 : 100;
 }
 
-<div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
-        <!-- Drobečková navigace -->
-        <div class="custom-breadcrumb-bar">
-            <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad</a>
-            <span class="sep"><i class="bi bi-chevron-right"></i></span>
-            <a asp-page="./Index">Katalog produktů</a>
-            <span class="sep"><i class="bi bi-chevron-right"></i></span>
-            <span class="current">@Model.Product.Name</span>
-        </div>
+<!-- Drobečková navigace - jednotná šířka přes celou šířku kontejneru -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <a asp-page="./Index">Katalog produktů</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">@Model.Product.Name</span>
+</div>
 
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge badge-sku fs-6 px-3 py-2">@Model.Product.Code</span>
-                    @if (Model.Product.IsActive)
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge badge-sku fs-6">@Model.Product.Code</span>
+            @if (Model.Product.IsActive)
+            {
+                <span class="badge badge-active"><i class="bi bi-check2 me-1"></i>Aktivní v nabídce</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary-subtle text-secondary">Neaktivní položka</span>
+            }
+        </div>
+        <h1 class="h2 fw-bold text-wood-dark mb-0">@Model.Product.Name</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="./Index" class="btn btn-outline-wood-pine btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Zpět na katalog
+        </a>
+        <a asp-page="./Edit" asp-route-id="@Model.Product.Id" class="btn btn-wood-pine btn-sm shadow-sm">
+            <i class="bi bi-pencil me-1"></i> Upravit produkt
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Levý sloupec: Popis produktu a systémová data -->
+    <div class="col-12 col-lg-8">
+        <div class="card mb-4 h-100">
+            <div class="card-header bg-white py-3">
+                <span class="fw-bold text-wood-dark text-uppercase extra-small letter-spacing-1">
+                    <i class="bi bi-card-text text-wood-terracotta me-1"></i>Informace o produktu
+                </span>
+            </div>
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="fw-bold text-wood-dark mb-3">Popis a specifikace položky</h5>
+                    @if (!string.IsNullOrWhiteSpace(Model.Product.Description))
                     {
-                        <span class="badge badge-active px-2 py-1"><i class="bi bi-check2 me-1"></i>Aktivní v nabídce</span>
+                        <p class="text-secondary mb-4" style="line-height: 1.7; font-size: 0.95rem;">
+                            @Model.Product.Description
+                        </p>
                     }
                     else
                     {
-                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1">Neaktivní položka</span>
+                        <p class="text-muted fst-italic mb-4">K tomuto produktu zatím nebyl zadán podrobný dílenský popis.</p>
                     }
                 </div>
-                <div>
-                    <a asp-page="./Edit" asp-route-id="@Model.Product.Id" class="btn btn-outline-wood-terracotta btn-sm">
-                        <i class="bi bi-pencil me-1"></i> Upravit
-                    </a>
+
+                <div class="border p-3 bg-wood-sand-subtle border-wood-sand mt-4">
+                    <div class="fw-bold extra-small text-uppercase text-wood-dark mb-2">
+                        <i class="bi bi-clock-history text-wood-terracotta me-1"></i>Systémová evidence záznamu
+                    </div>
+                    <div class="row small text-muted g-2">
+                        <div class="col-sm-6">
+                            Založeno v databázi: <strong class="text-wood-dark font-monospace">@Model.Product.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            Poslední aktualizace: <strong class="text-wood-dark font-monospace">@(Model.Product.UpdatedAt.HasValue ? Model.Product.UpdatedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm") : "Původní stav")</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card-body p-4">
-                <h1 class="h3 fw-bold text-wood-dark mb-2">@Model.Product.Name</h1>
+        </div>
+    </div>
 
-                @if (!string.IsNullOrWhiteSpace(Model.Product.Description))
-                {
-                    <p class="text-secondary fs-6 mb-4">@Model.Product.Description</p>
-                }
-                else
-                {
-                    <p class="text-muted fst-italic mb-4">K tomuto produktu zatím nebyl vyplněn podrobnější popis.</p>
-                }
-
-                <div class="row g-3 mb-4">
-                    <div class="col-12 col-md-4">
-                        <div class="p-3 bg-wood-sand-subtle text-center border border-wood-sand">
-                            <div class="text-muted small mb-1">Nákupní cena</div>
-                            <div class="fs-4 price-display price-purchase">@Model.Product.PurchasePrice.ToString("C2")</div>
-                            <div class="text-muted extra-small">bez DPH</div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="p-3 bg-wood-sand-subtle text-center border border-wood-sand">
-                            <div class="text-muted small mb-1">Prodejní cena</div>
-                            <div class="fs-4 price-display price-selling">
-                                <span class="margin-arrow-up"><i class="bi bi-arrow-up-short"></i></span>@Model.Product.SellingPrice.ToString("C2")
-                            </div>
-                            <div class="text-muted extra-small">koncová cena pro e-shop</div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="p-3 bg-wood-sand-subtle text-center border border-wood-sand">
-                            <div class="text-muted small mb-1">Kalkulovaný zisk (marže)</div>
-                            <div class="fs-4 price-display text-wood-terracotta">@margin.ToString("C2")</div>
-                            <div class="extra-small mt-1">
-                                <span class="badge @(marginPercent >= 100 ? "badge-active" : "badge-margin")">
-                                    <i class="bi bi-graph-up me-1"></i>+@marginPercent.ToString("F0") %
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Pravý sloupec: Cenový a maržový přehled -->
+    <div class="col-12 col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-white py-3">
+                <span class="fw-bold text-wood-dark text-uppercase extra-small letter-spacing-1">
+                    <i class="bi bi-tag text-wood-terracotta me-1"></i>Cenotvorba & Marže
+                </span>
+            </div>
+            <div class="card-body p-4 d-flex flex-column gap-3 justify-content-between">
+                <div class="p-3 bg-wood-sand-subtle border border-wood-sand">
+                    <div class="text-muted extra-small text-uppercase fw-bold">Nákupní cena (výroba)</div>
+                    <div class="fs-4 price-display price-purchase mt-1">@Model.Product.PurchasePrice.ToString("C2")</div>
+                    <div class="text-muted extra-small">Náklad bez DPH</div>
                 </div>
 
-                <div class="border p-3 bg-white border-wood-sand">
-                    <h6 class="fw-bold mb-2 text-wood-dark"><i class="bi bi-clock-history me-1 text-wood-terracotta"></i>Systémová evidence</h6>
-                    <div class="row small text-muted">
-                        <div class="col-6">Založeno v systému: <strong>@Model.Product.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</strong></div>
-                        <div class="col-6">Poslední aktualizace: <strong>@(Model.Product.UpdatedAt.HasValue ? Model.Product.UpdatedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm") : "Původní záznam")</strong></div>
+                <div class="p-3 bg-white border border-wood-sand">
+                    <div class="text-muted extra-small text-uppercase fw-bold">Prodejní cena (e-shop)</div>
+                    <div class="fs-3 price-display price-selling mt-1">
+                        <span class="margin-arrow-up"><i class="bi bi-arrow-up-short"></i></span>@Model.Product.SellingPrice.ToString("C2")
                     </div>
+                    <div class="text-muted extra-small">Koncová maloobchodní cena</div>
                 </div>
 
-                <div class="mt-4 pt-3 border-top border-wood-sand d-flex justify-content-between">
-                    <a asp-page="./Index" class="btn btn-outline-wood-pine">
-                        <i class="bi bi-arrow-left me-1"></i> Zpět na katalog
-                    </a>
-                    <a asp-page="./Edit" asp-route-id="@Model.Product.Id" class="btn btn-wood-pine">
-                        <i class="bi bi-pencil me-1"></i> Upravit produkt
-                    </a>
+                <div class="p-3 bg-wood-sand-subtle border border-wood-sand">
+                    <div class="text-muted extra-small text-uppercase fw-bold">Kalkulovaný zisk na kusu</div>
+                    <div class="fs-4 price-display text-wood-terracotta mt-1">@margin.ToString("C2")</div>
+                    <div class="mt-2">
+                        <span class="badge @(marginPercent >= 100 ? "badge-active" : "badge-margin")">
+                            <i class="bi bi-graph-up me-1"></i>Přirážka: +@marginPercent.ToString("F0") %
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

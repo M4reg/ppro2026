@@ -4,31 +4,32 @@
     ViewData["Title"] = "Nová položka";
 }
 
-<div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
-        <!-- Drobečková navigace -->
-        <div class="custom-breadcrumb-bar">
-            <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad</a>
-            <span class="sep"><i class="bi bi-chevron-right"></i></span>
-            <a asp-page="./Index">Katalog produktů</a>
-            <span class="sep"><i class="bi bi-chevron-right"></i></span>
-            <span class="current">Přidat položku</span>
-        </div>
+<!-- Drobečková navigace - jednotná šířka přes celý kontejner -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <a asp-page="./Index">Katalog produktů</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Přidat položku</span>
+</div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3 border-bottom border-wood-sand">
-                <h2 class="h4 mb-1 fw-bold text-wood-dark">
-                    <i class="bi bi-plus-circle text-wood-terracotta me-2"></i>Přidat nový produkt do skladu
-                </h2>
-                <span class="text-muted small">Zadejte parametry dřevěné hračky. Kód položky (SKU) je jedinečný identifikátor pro sklad a e-shop.</span>
-            </div>
-            <div class="card-body p-4">
-                <form method="post" id="createProductForm">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm" role="alert"></div>
+<div class="card mb-4">
+    <div class="card-header bg-white py-3 border-bottom border-wood-sand">
+        <h2 class="h4 mb-1 fw-bold text-wood-dark">
+            <i class="bi bi-plus-lg text-wood-terracotta me-2"></i>Založení nové položky v evidenci skladu
+        </h2>
+        <span class="text-muted small">Vyplňte parametry dřevěné hračky. Kód SKU musí být v systému jedinečný.</span>
+    </div>
+    <div class="card-body p-4">
+        <form method="post" id="createProductForm">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm border-0" role="alert"></div>
 
+            <div class="row g-4">
+                <!-- Levý sloupec: Základní identifikační údaje -->
+                <div class="col-12 col-lg-7 d-flex flex-column gap-3">
                     <div class="row g-3">
                         <div class="col-12 col-md-5">
-                            <label asp-for="Input.Code" class="form-label fw-semibold text-wood-dark"></label>
+                            <label asp-for="Input.Code" class="form-label fw-semibold text-wood-dark extra-small text-uppercase"></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-wood-sand-subtle border-wood-sand text-wood-terracotta"><i class="bi bi-upc-scan"></i></span>
                                 <input asp-for="Input.Code" class="form-control border-wood-sand font-monospace text-uppercase" placeholder="např. KAC-002" autofocus />
@@ -38,63 +39,68 @@
                         </div>
 
                         <div class="col-12 col-md-7">
-                            <label asp-for="Input.Name" class="form-label fw-semibold text-wood-dark"></label>
+                            <label asp-for="Input.Name" class="form-label fw-semibold text-wood-dark extra-small text-uppercase"></label>
                             <input asp-for="Input.Name" class="form-control border-wood-sand" placeholder="např. Dřevěná káča dvoubarevná" />
                             <span asp-validation-for="Input.Name" class="text-danger small"></span>
                         </div>
+                    </div>
 
-                        <div class="col-12">
-                            <label asp-for="Input.Description" class="form-label fw-semibold text-wood-dark"></label>
-                            <textarea asp-for="Input.Description" class="form-control border-wood-sand" rows="3" placeholder="Popis výrobku, materiál (např. bukové dřevo, netoxické barvy), rozměry apod."></textarea>
-                            <span asp-validation-for="Input.Description" class="text-danger small"></span>
-                        </div>
+                    <div>
+                        <label asp-for="Input.Description" class="form-label fw-semibold text-wood-dark extra-small text-uppercase"></label>
+                        <textarea asp-for="Input.Description" class="form-control border-wood-sand" rows="4" placeholder="Popis výrobku, materiál (např. masivní buk, voskovaná povrchová úprava), rozměry apod."></textarea>
+                        <span asp-validation-for="Input.Description" class="text-danger small"></span>
+                    </div>
+                </div>
 
-                        <div class="col-12 col-md-6">
-                            <label asp-for="Input.PurchasePrice" class="form-label fw-semibold text-wood-dark"></label>
-                            <div class="input-group">
-                                <input asp-for="Input.PurchasePrice" type="number" step="0.50" min="0" class="form-control border-wood-sand text-end font-monospace" id="purchasePriceInput" oninput="calculateMargin()" />
-                                <span class="input-group-text bg-wood-sand-subtle border-wood-sand text-wood-dark">Kč</span>
-                            </div>
-                            <span asp-validation-for="Input.PurchasePrice" class="text-danger small"></span>
-                            <div class="form-text small">Nákupní / výrobní cena bez DPH.</div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <label asp-for="Input.SellingPrice" class="form-label fw-semibold text-wood-dark"></label>
-                            <div class="input-group">
-                                <input asp-for="Input.SellingPrice" type="number" step="1.00" min="0" class="form-control border-wood-sand text-end font-monospace" id="sellingPriceInput" oninput="calculateMargin()" />
-                                <span class="input-group-text bg-wood-sand-subtle border-wood-sand text-wood-dark">Kč</span>
-                            </div>
-                            <span asp-validation-for="Input.SellingPrice" class="text-danger small"></span>
-                            <div class="form-text small">Koncová prodejní cena e-shopu.</div>
-                        </div>
-
-                        <!-- Živý náhled kalkulace marže -->
-                        <div class="col-12">
-                            <div class="p-3 bg-wood-sand-subtle border border-wood-sand d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="text-muted extra-small text-uppercase fw-bold">Předpokládaný zisk (marže):</div>
-                                    <div class="fw-bold fs-5 price-display text-wood-dark" id="marginKcs">0,00 Kč</div>
+                <!-- Pravý sloupec: Cenotvorba & Živý náhled marže -->
+                <div class="col-12 col-lg-5 d-flex flex-column gap-3">
+                    <div class="p-3 bg-wood-sand-subtle border border-wood-sand">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="Input.PurchasePrice" class="form-label fw-semibold text-wood-dark extra-small text-uppercase"></label>
+                                <div class="input-group">
+                                    <input asp-for="Input.PurchasePrice" type="number" step="0.50" min="0" class="form-control border-wood-sand text-end font-monospace" id="purchasePriceInput" oninput="calculateMargin()" />
+                                    <span class="input-group-text bg-white border-wood-sand text-wood-dark">Kč</span>
                                 </div>
-                                <div class="text-end">
-                                    <div class="text-muted extra-small text-uppercase fw-bold">Ziskovost:</div>
-                                    <span class="badge badge-active fs-6" id="marginPercent">0 %</span>
+                                <span asp-validation-for="Input.PurchasePrice" class="text-danger small"></span>
+                                <div class="text-muted extra-small mt-1">Náklad bez DPH</div>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="Input.SellingPrice" class="form-label fw-semibold text-wood-dark extra-small text-uppercase"></label>
+                                <div class="input-group">
+                                    <input asp-for="Input.SellingPrice" type="number" step="1.00" min="0" class="form-control border-wood-sand text-end font-monospace" id="sellingPriceInput" oninput="calculateMargin()" />
+                                    <span class="input-group-text bg-white border-wood-sand text-wood-dark">Kč</span>
                                 </div>
+                                <span asp-validation-for="Input.SellingPrice" class="text-danger small"></span>
+                                <div class="text-muted extra-small mt-1">Koncová cena pro e-shop</div>
+                            </div>
+                        </div>
+
+                        <!-- Živá kalkulace marže -->
+                        <div class="pt-3 border-top border-wood-sand mt-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted extra-small text-uppercase fw-bold">Zisk na kusu:</div>
+                                <div class="fw-bold fs-5 price-display text-wood-dark" id="marginKcs">0,00 Kč</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted extra-small text-uppercase fw-bold">Marže:</div>
+                                <span class="badge badge-active fs-6" id="marginPercent">0 %</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-wood-sand">
-                        <a asp-page="./Index" class="btn btn-outline-wood-pine px-3">
+                    <div class="d-flex justify-content-between align-items-center pt-2">
+                        <a asp-page="./Index" class="btn btn-outline-wood-pine">
                             <i class="bi bi-arrow-left me-1"></i> Zpět do katalogu
                         </a>
-                        <button type="submit" class="btn btn-wood-pine px-4 py-2 fw-semibold shadow-sm">
+                        <button type="submit" class="btn btn-wood-pine px-4 shadow-sm">
                             <i class="bi bi-check-lg me-1"></i> Uložit produkt
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 

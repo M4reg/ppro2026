@@ -43,6 +43,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Sjednocený kontejner pro všechny stránky (žádné poskakování šířky) */
+.app-container {
+  width: 100%;
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
 /* Globální odstranění kulatých AI tvarů */
 .rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-4, .rounded-5, .rounded-pill {
   border-radius: 2px !important;
@@ -102,6 +112,36 @@ h1, h2, h3, h4, h5, h6 {
   border-bottom-color: var(--wood-terracotta);
 }
 
+/* Mobilní navigace (Hamburger menu) - čisté zarovnání a plné popisky */
+@media (max-width: 767.98px) {
+  .navbar-wood .navbar-collapse {
+    background-color: var(--wood-pine);
+    padding: 1rem 0.75rem 0.75rem 0.75rem;
+    border-top: 1px solid rgba(204, 139, 101, 0.35);
+    margin-top: 0.5rem;
+  }
+  .navbar-wood .navbar-nav {
+    width: 100%;
+  }
+  .navbar-wood .nav-link {
+    padding: 0.65rem 1rem !important;
+    margin-bottom: 0.25rem;
+    border-bottom: none !important;
+    border-left: 3px solid transparent;
+    background-color: rgba(227, 220, 210, 0.04);
+  }
+  .navbar-wood .nav-link:hover, .navbar-wood .nav-link.active {
+    border-left-color: var(--wood-terracotta);
+    background-color: rgba(204, 139, 101, 0.15);
+  }
+  .nav-user-panel {
+    padding-top: 0.85rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(204, 139, 101, 0.35);
+    width: 100%;
+  }
+}
+
 /* Řemeslná karta (čisté ostré hrany, bez nafouknutého stínu) */
 .card {
   background-color: var(--wood-card-bg);
@@ -123,7 +163,7 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--wood-sand-border);
   border-left: 5px solid var(--wood-pine);
   border-radius: 2px;
-  padding: 2rem 2.25rem;
+  padding: 1.75rem 2rem;
   box-shadow: 0 1px 4px rgba(16, 12, 13, 0.04);
 }
 
@@ -151,12 +191,12 @@ h1, h2, h3, h4, h5, h6 {
   border-top: 3px solid var(--wood-sand-deep);
 }
 
-/* Drobečková navigace - čistá, strukturovaná */
+/* Drobečková navigace - jednotná šířka, bez odskoků */
 .custom-breadcrumb-bar {
   background-color: #FFFFFF;
   border: 1px solid var(--wood-sand-border);
   border-radius: 2px;
-  padding: 0.5rem 0.85rem;
+  padding: 0.55rem 0.85rem;
   margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
@@ -165,6 +205,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  width: 100%;
 }
 
 .custom-breadcrumb-bar a {
@@ -324,6 +365,25 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
+/* Decentní statusový bod (nahrazuje křiklavě zelené štítky) */
+.craft-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--wood-sand);
+  letter-spacing: 0.02em;
+}
+
+.craft-status-tag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50% !important;
+  background-color: var(--wood-terracotta);
+  display: inline-block;
+}
+
 /* Ceny & Marže */
 .price-display {
   font-family: 'JetBrains Mono', monospace;
@@ -340,7 +400,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .margin-arrow-up {
-  color: #198754;
+  color: var(--wood-pine);
   display: inline-flex;
   align-items: center;
   font-weight: 700;
