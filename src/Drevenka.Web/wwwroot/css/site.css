@@ -1,31 +1,380 @@
+/* ==========================================================================
+   Dřevěnka s.r.o. - Řemeslný design systém (Workshop & Carpenter Craft)
+   Paleta: #E3DCD2, #CC8B65, #013328, #100C0D
+   Odstraněno: zaoblené bubliny, generické AI gradienty a měkké stíny.
+   Styl: Čisté geometrické linie, poctivé řemeslné ohraničení, vysoká přehlednost.
+   ========================================================================== */
+
+:root {
+  --wood-sand: #E3DCD2;
+  --wood-sand-subtle: #F2EDE4;
+  --wood-sand-border: #D1C5B4;
+  --wood-sand-deep: #BEAF9B;
+  --wood-terracotta: #CC8B65;
+  --wood-terracotta-hover: #B87652;
+  --wood-terracotta-subtle: #F7EFE9;
+  --wood-pine: #013328;
+  --wood-pine-hover: #034436;
+  --wood-pine-subtle: #E2ECE8;
+  --wood-dark: #100C0D;
+  --wood-dark-subtle: #332B2D;
+  --wood-bg: #F9F7F3;
+  --wood-card-bg: #FFFFFF;
+}
+
 html {
   font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
   position: relative;
   min-height: 100%;
 }
 
+@media (min-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+}
+
 body {
-  margin-bottom: 60px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--wood-bg);
+  color: var(--wood-dark);
+  margin: 0 !important;
+  padding: 0 !important;
+  -webkit-font-smoothing: antialiased;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Globální odstranění kulatých AI tvarů */
+.rounded, .rounded-1, .rounded-2, .rounded-3, .rounded-4, .rounded-5, .rounded-pill {
+  border-radius: 2px !important;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Typografie */
+.font-monospace {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--wood-dark);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+/* Navigace - poctivá masivní lišta */
+.navbar-wood {
+  background-color: var(--wood-pine) !important;
+  border-bottom: 2px solid var(--wood-terracotta);
+  padding: 0.65rem 0;
+}
+
+.navbar-wood .navbar-brand {
+  color: #FFFFFF !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.navbar-wood .brand-sub {
+  color: var(--wood-sand) !important;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.navbar-wood .nav-link {
+  color: var(--wood-sand) !important;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 2px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.navbar-wood .nav-link:hover {
+  color: #FFFFFF !important;
+  background-color: rgba(227, 220, 210, 0.08);
+  border-bottom-color: var(--wood-terracotta);
+}
+
+.navbar-wood .nav-link.active {
+  color: #FFFFFF !important;
+  background-color: rgba(204, 139, 101, 0.2);
+  border-bottom-color: var(--wood-terracotta);
+}
+
+/* Řemeslná karta (čisté ostré hrany, bez nafouknutého stínu) */
+.card {
+  background-color: var(--wood-card-bg);
+  border: 1px solid var(--wood-sand-border) !important;
+  border-radius: 2px !important;
+  box-shadow: 0 1px 3px rgba(16, 12, 13, 0.05);
+}
+
+.card-header {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--wood-sand-border);
+  padding: 0.85rem 1.25rem;
+  border-radius: 0 !important;
+}
+
+/* Hero panel - poctivý řemeslný blok */
+.hero-craft-block {
+  background-color: #FFFFFF;
+  border: 1px solid var(--wood-sand-border);
+  border-left: 5px solid var(--wood-pine);
+  border-radius: 2px;
+  padding: 2rem 2.25rem;
+  box-shadow: 0 1px 4px rgba(16, 12, 13, 0.04);
+}
+
+/* Řemeslné statistické bloky */
+.stat-box {
+  background-color: #FFFFFF;
+  border: 1px solid var(--wood-sand-border);
+  border-radius: 2px;
+  padding: 1.25rem 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.stat-box-pine {
+  border-top: 3px solid var(--wood-pine);
+}
+
+.stat-box-terracotta {
+  border-top: 3px solid var(--wood-terracotta);
+}
+
+.stat-box-sand {
+  border-top: 3px solid var(--wood-sand-deep);
+}
+
+/* Drobečková navigace - čistá, strukturovaná */
+.custom-breadcrumb-bar {
+  background-color: #FFFFFF;
+  border: 1px solid var(--wood-sand-border);
+  border-radius: 2px;
+  padding: 0.5rem 0.85rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.custom-breadcrumb-bar a {
+  color: var(--wood-pine);
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.custom-breadcrumb-bar a:hover {
+  color: var(--wood-terracotta);
+}
+
+.custom-breadcrumb-bar .sep {
+  color: var(--wood-sand-deep);
+  font-size: 0.75rem;
+  margin: 0 0.25rem;
+}
+
+.custom-breadcrumb-bar .current {
+  color: var(--wood-dark);
+  font-weight: 700;
+}
+
+/* Tlačítka - ostré, pevné hrany */
+.btn {
+  border-radius: 2px !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.5rem 1rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-sm {
+  padding: 0.28rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.btn-lg {
+  padding: 0.7rem 1.35rem;
+  font-size: 0.95rem;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary, .btn-wood-pine {
+  background-color: var(--wood-pine) !important;
+  border-color: var(--wood-pine) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-primary:hover, .btn-wood-pine:hover {
+  background-color: var(--wood-pine-hover) !important;
+  border-color: var(--wood-pine-hover) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-wood-terracotta {
+  background-color: var(--wood-terracotta) !important;
+  border-color: var(--wood-terracotta) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-wood-terracotta:hover {
+  background-color: var(--wood-terracotta-hover) !important;
+  border-color: var(--wood-terracotta-hover) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-outline-wood-pine {
+  color: var(--wood-pine) !important;
+  border: 1px solid var(--wood-pine) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-wood-pine:hover {
+  background-color: var(--wood-pine) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-outline-wood-terracotta {
+  color: var(--wood-terracotta) !important;
+  border: 1px solid var(--wood-terracotta) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-wood-terracotta:hover {
+  background-color: var(--wood-terracotta) !important;
+  color: #FFFFFF !important;
+}
+
+/* Formulářové prvky - přesné 2px hrany */
+.form-control, .form-select, .input-group-text {
+  border-radius: 2px !important;
+  border-color: var(--wood-sand-border);
+  font-size: 0.9rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--wood-pine);
+  box-shadow: 0 0 0 2px rgba(1, 51, 40, 0.15);
+}
+
+/* Tabulky */
+.table {
+  --bs-table-hover-bg: rgba(227, 220, 210, 0.28);
+  border-color: var(--wood-sand-border);
+}
+
+.table thead th {
+  background-color: var(--wood-sand-subtle);
+  color: var(--wood-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--wood-sand-border);
+  padding: 0.65rem 0.85rem;
+}
+
+.table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--wood-sand-border);
+}
+
+/* Štitky (Badges) - ostré řemeslné štítky */
+.badge {
+  border-radius: 2px !important;
+  font-weight: 600;
+  font-size: 0.74rem;
+  padding: 0.3em 0.55em;
+  letter-spacing: 0.02em;
+}
+
+.badge-sku {
+  background-color: var(--wood-sand-subtle) !important;
+  color: var(--wood-dark) !important;
+  border: 1px solid var(--wood-sand-border);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+.badge-active {
+  background-color: var(--wood-pine-subtle) !important;
+  color: var(--wood-pine) !important;
+  border: 1px solid rgba(1, 51, 40, 0.25);
+  font-weight: 700;
+}
+
+.badge-margin {
+  background-color: var(--wood-terracotta-subtle) !important;
+  color: var(--wood-terracotta-hover) !important;
+  border: 1px solid rgba(204, 139, 101, 0.35);
+  font-weight: 700;
+}
+
+/* Ceny & Marže */
+.price-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.price-selling {
+  color: var(--wood-pine);
+}
+
+.price-purchase {
+  color: #636b6f;
+}
+
+.margin-arrow-up {
+  color: #198754;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+/* Barvy a utility */
+.bg-wood-sand { background-color: var(--wood-sand) !important; }
+.bg-wood-sand-subtle { background-color: var(--wood-sand-subtle) !important; }
+.bg-wood-terracotta { background-color: var(--wood-terracotta) !important; }
+.bg-wood-pine { background-color: var(--wood-pine) !important; }
+.bg-wood-dark { background-color: var(--wood-dark) !important; }
+
+.text-wood-sand { color: var(--wood-sand) !important; }
+.text-wood-terracotta { color: var(--wood-terracotta) !important; }
+.text-wood-pine { color: var(--wood-pine) !important; }
+.text-wood-dark { color: var(--wood-dark) !important; }
+
+.border-wood-sand { border-color: var(--wood-sand-border) !important; }
+
+/* Patička - pevný masivní základ webu */
+footer.site-footer {
+  background-color: var(--wood-dark) !important;
+  color: var(--wood-sand) !important;
+  border-top: 2px solid var(--wood-terracotta);
+  margin-top: auto;
+  margin-bottom: 0 !important;
+  padding: 1.5rem 0;
+}
+
+footer.site-footer a {
+  color: var(--wood-sand);
+  text-decoration: none;
+}
+
+footer.site-footer a:hover {
+  color: var(--wood-terracotta);
 }

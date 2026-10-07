@@ -189,6 +189,15 @@ dotnet run --project src/Drevenka.Web/Drevenka.Web.csproj
 
 ## 7. Deník změn a rozhodnutí (Changelog & Progress Log)
 
+- **2026-10-07 (Refaktoring frontendového UI, sjednocení PostgreSQL a rozšíření filtrů):**
+  - **Sjednocení databáze na PostgreSQL**: Opravena konfigurace `Npgsql.EntityFrameworkCore.PostgreSQL`, sjednocen snapshot a migrace, opraven build Dockeru pro .NET 9.
+  - **Oprava patičky (Sticky footer)**: Odstraněn přebytečný `margin-bottom: 60px` na `body` a absolutní pozicování, patička je nyní flexibilně ukotvena na spodním okraji okna bez nežádoucí mezery pod ní.
+  - **Lokalizace a zobrazení cen**: Nastavena globální kultura `cs-CZ` v `Program.cs`, čímž byl vyřešen problém se zástupným znakem měny `¤` (ceny jsou formátovány jako `120,00 Kč`). U prodejních cen a marží byly doplněny zelené indikátory růstu marže.
+  - **Odstranění akademických textů**: Z celého UI byly odstraněny zmínky o školním zadání (PPRO, Zadání B, GitHub, semestrální práce), aplikace nyní vystupuje jako plnohodnotný klientský systém pro Dřevěnka s.r.o.
+  - **Nové stylování drobečkové navigace (Breadcrumbs)**: Zavedena komponenta `.custom-breadcrumb-bar` s čistým vizuálem a oddělovači.
+  - **Rozšířené vyhledávání a filtrování**: Přidáno oddělené tlačítko pro vyhledávání i filtry; vyhledávání nyní podporuje zadání více SKU kódů najednou (např. oddělených čárkou). Doplněno filtrování podle stavu a cenového rozpětí i řazení.
+  - **Nová paleta barev a řemeslný workshop vizuál**: Aplikován nový čistý styl postavený na barvách `#E3DCD2` (písek/dřevo), `#CC8B65` (terakota), `#013328` (lesní zeleň) a `#100C0D` (eben). Odstraněny generické kulaté bubliny a gradienty, nahrazeno poctivou pevnou geometrií a řemeslnými bloky.
+
 - **2026-09-30 (Fáze 2: Implementace funkčního dema nad entitou Produkt):**
   - Schválen implementační plán úvodního dema ([demo_implementation_plan.md](file:///C:/Users/ludvima3/.gemini/antigravity-ide/brain/363692ef-ecf3-40b8-a3fe-b99ad1c923dc/demo_implementation_plan.md)).
   - Vytvořeno .NET 10 solution `Drevenka.slnx` se striktní třívrstvou architekturou:

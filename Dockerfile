@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Build & Publish
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
 # Kopírování projektových souborů a obnova závislostí
@@ -18,7 +18,7 @@ COPY src/ ./src/
 RUN dotnet publish ./src/Drevenka.Web/Drevenka.Web.csproj -c Release -o /out
 
 # Stage 2: Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /out ./
 
