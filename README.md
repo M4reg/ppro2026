@@ -189,6 +189,11 @@ dotnet run --project src/Drevenka.Web/Drevenka.Web.csproj
 
 ## 7. Deník změn a rozhodnutí (Changelog & Progress Log)
 
+- **2026-10-21 (Oprava PostgreSQL datových typů v počáteční migraci):**
+  - **Oprava migrace InitialCreate**: Opraveny datové typy a anotace v migračním souboru `20261006145553_InitialCreate.cs` a designeru z pozůstatků SQLite (`TEXT`, `INTEGER`) na korektní Npgsql/PostgreSQL typy (`character varying`, `numeric(18,2)`, `boolean`, `integer`).
+  - Vyřešena chyba `42883: operator does not exist: text >= integer` při aplikaci integritního check constraintu `"PurchasePrice" >= 0` a `"SellingPrice" >= 0`.
+  - Ověřeno bezchybné spuštění a seedování PostgreSQL a webové aplikace v Dockeru na portu 5000.
+
 - **2026-10-07 (Refaktoring frontendového UI, sjednocení PostgreSQL a rozšíření filtrů):**
   - **Sjednocení databáze na PostgreSQL**: Opravena konfigurace `Npgsql.EntityFrameworkCore.PostgreSQL`, sjednocen snapshot a migrace, opraven build Dockeru pro .NET 9.
   - **Oprava patičky (Sticky footer)**: Odstraněn přebytečný `margin-bottom: 60px` na `body` a absolutní pozicování, patička je nyní flexibilně ukotvena na spodním okraji okna bez nežádoucí mezery pod ní.
