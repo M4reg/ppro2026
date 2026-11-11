@@ -1,0 +1,172 @@
+@page
+@model Drevenka.Web.Pages.Orders.CreateModel
+@{
+    ViewData["Title"] = "Nová objednávka zákazníka";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <a asp-page="./Index">Objednávky</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Nová objednávka</span>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="h2 mb-1 fw-bold text-wood-dark">
+                    <i class="bi bi-plus-circle text-wood-terracotta me-2"></i>Příjem nové objednávky
+                </h1>
+                <p class="text-muted small mb-0">Zadání objednávky zákazníka s okamžitou validací disponibilních zásob na skladě.</p>
+            </div>
+            <a asp-page="./Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Zpět na seznam
+            </a>
+        </div>
+
+        @if (!ModelState.IsValid)
+        {
+            <div class="alert alert-danger craft-card border-0 border-start border-danger border-4 shadow-sm mb-4" role="alert">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-exclamation-octagon-fill text-danger fs-4 me-3 mt-1"></i>
+                    <div>
+                        <strong class="d-block mb-1">Objednávku se nepodařilo zpracovat:</strong>
+                        <div asp-validation-summary="All" class="text-danger small mb-0"></div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <form method="post">
+            <div class="row g-4">
+                <!-- Levý sloupec: Údaje zákazníka a doručení -->
+                <div class="col-12 col-lg-5">
+                    <div class="craft-card bg-white p-4 h-100 shadow-sm">
+                        <h2 class="h5 fw-bold text-wood-dark mb-3 border-bottom pb-2">
+                            <i class="bi bi-person text-wood-pine me-2"></i>Zákazník a doručení
+                        </h2>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.CustomerId" class="form-label fw-semibold">Zákazník <span class="text-danger">*</span></label>
+                            <select asp-for="Input.CustomerId" asp-items="Model.CustomerOptions" class="form-select" id="customerSelect">
+                                <option value="">-- Zvolte zákazníka z databáze --</option>
+                            </select>
+                            <span asp-validation-for="Input.CustomerId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.DeliveryAddress" class="form-label fw-semibold">Ulice a číslo popisné <span class="text-danger">*</span></label>
+                            <input asp-for="Input.DeliveryAddress" class="form-control" placeholder="např. Pospíšilova 312" />
+                            <span asp-validation-for="Input.DeliveryAddress" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-8">
+                                <label asp-for="Input.DeliveryCity" class="form-label fw-semibold">Město <span class="text-danger">*</span></label>
+                                <input asp-for="Input.DeliveryCity" class="form-control" placeholder="např. Hradec Králové" />
+                                <span asp-validation-for="Input.DeliveryCity" class="text-danger small"></span>
+                            </div>
+                            <div class="col-4">
+                                <label asp-for="Input.DeliveryPostalCode" class="form-label fw-semibold">PSČ <span class="text-danger">*</span></label>
+                                <input asp-for="Input.DeliveryPostalCode" class="form-control" placeholder="500 03" />
+                                <span asp-validation-for="Input.DeliveryPostalCode" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.CustomerNote" class="form-label fw-semibold">Poznámka k doručení</label>
+                            <textarea asp-for="Input.CustomerNote" class="form-control" rows="3" placeholder="např. Zazvonit na školku, doručit odpoledne..."></textarea>
+                        </div>
+
+                        <div class="p-3 bg-light border border-wood-sand rounded small text-muted">
+                            <i class="bi bi-info-circle-fill text-wood-pine me-1"></i>
+                            <strong>Obchodní pravidlo:</strong> Jakmile objednávku potvrdíte, volná disponibilní zásoba se okamžitě zarezervuje. Pokud na skladě není dostatek kusů, systém objednávku odmítne.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pravý sloupec: Výběr položek a množství -->
+                <div class="col-12 col-lg-7">
+                    <div class="craft-card bg-white p-4 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h2 class="h5 fw-bold text-wood-dark mb-0">
+                                <i class="bi bi-boxes text-wood-pine me-2"></i>Položky objednávky
+                            </h2>
+                            <span class="badge bg-wood-pine text-wood-sand">Dostupnost na centrále</span>
+                        </div>
+
+                        <p class="text-muted small mb-3">Zadejte požadovaný počet kusů u produktů, které si zákazník objednává:</p>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr class="text-muted extra-small text-uppercase">
+                                        <th>Produkt</th>
+                                        <th class="text-end">Cena / ks</th>
+                                        <th class="text-center">Volné zásoby</th>
+                                        <th class="text-center" style="width: 140px;">Objednat (ks)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (var i = 0; i < Model.AvailableProducts.Count; i++)
+                                    {
+                                        var prod = Model.AvailableProducts[i];
+                                        <tr>
+                                            <td>
+                                                <input type="hidden" name="Input.Items[@i].ProductId" value="@prod.Id" />
+                                                <div class="fw-semibold text-wood-dark">@prod.Name</div>
+                                                <div class="extra-small font-monospace text-muted">@prod.Code</div>
+                                            </td>
+                                            <td class="text-end font-monospace fw-semibold text-wood-dark">
+                                                @prod.Price.ToString("N2") Kč
+                                            </td>
+                                            <td class="text-center">
+                                                @if (prod.AvailableStock > 5)
+                                                {
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace">
+                                                        @prod.AvailableStock ks
+                                                    </span>
+                                                }
+                                                else if (prod.AvailableStock > 0)
+                                                {
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle font-monospace">
+                                                        @prod.AvailableStock ks
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle font-monospace">
+                                                        0 ks (vyprodáno)
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" 
+                                                       name="Input.Items[@i].Quantity" 
+                                                       value="0" 
+                                                       min="0" 
+                                                       max="@(Math.Max(0, prod.AvailableStock))" 
+                                                       class="form-control form-control-sm text-center font-monospace" />
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a asp-page="./Index" class="btn btn-outline-secondary">Zrušit</a>
+                            <button type="submit" class="btn btn-wood-terracotta px-4 py-2 fw-semibold shadow-sm">
+                                <i class="bi bi-check-lg me-1"></i> Přijmout a zarezervovat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

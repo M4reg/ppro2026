@@ -14,21 +14,18 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-md navbar-dark navbar-wood shadow-sm">
-            <div class="app-container d-flex align-items-center justify-content-between">
-                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-page="/Index">
+        <nav class="navbar navbar-dark navbar-wood shadow-sm">
+            <div class="app-container d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3 gap-md-0">
+                <a class="navbar-brand d-flex align-items-center gap-2 mb-1 mb-md-0" asp-area="" asp-page="/Index">
                     <span class="fs-4 text-wood-terracotta"><i class="bi bi-box-seam-fill"></i></span>
                     <div>
                         <span class="d-block lh-1 fw-bold fs-5 text-white">Dřevěnka s.r.o.</span>
                         <span class="brand-sub d-block">Skladový a expediční systém</span>
                     </div>
                 </a>
-                <button class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar"
-                        aria-expanded="false" aria-label="Přepnout navigaci">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav me-auto mb-2 mb-md-0 ms-md-4 gap-md-1">
+                
+                <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between flex-grow-1 gap-2 gap-md-0">
+                    <ul class="navbar-nav d-flex flex-column flex-md-row me-auto mb-2 mb-md-0 ms-md-4 gap-1">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">
                                 <i class="bi bi-speedometer2 me-1"></i> Přehled
@@ -36,12 +33,17 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Warehouse/Index">
-                                <i class="bi bi-boxes me-1"></i> Zásoby & Sklady
+                                <i class="bi bi-boxes me-1"></i> Sklad & Zásoby
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/Orders/Index">
+                                <i class="bi bi-receipt me-1"></i> Objednávky
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Products/Index">
-                                <i class="bi bi-grid me-1"></i> Katalog produktů
+                                <i class="bi bi-grid me-1"></i> Produkty
                             </a>
                         </li>
                         <li class="nav-item">
@@ -50,13 +52,13 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Products/Create">
-                                <i class="bi bi-plus-lg me-1"></i> Nová položka
+                            <a class="nav-link" asp-area="" asp-page="/Customers/Index">
+                                <i class="bi bi-people me-1"></i> Zákazníci
                             </a>
                         </li>
                     </ul>
                     <div class="nav-user-panel d-flex align-items-center justify-content-between justify-content-md-end gap-3">
-                        <span class="craft-status-tag d-inline-flex border border-wood-sand px-2 py-1 bg-wood-pine">
+                        <span class="craft-status-tag text-wood-sand">
                             <span class="dot"></span> Sklad online
                         </span>
                         <div class="d-flex align-items-center gap-2 text-wood-sand small">

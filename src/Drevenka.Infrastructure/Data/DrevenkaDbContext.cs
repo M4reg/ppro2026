@@ -15,6 +15,9 @@ public class DrevenkaDbContext : DbContext
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<StockItem> StockItems => Set<StockItem>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -234,6 +237,121 @@ public class DrevenkaDbContext : DbContext
             entity.HasOne(sm => sm.Warehouse)
                 .WithMany()
                 .HasForeignKey(sm => sm.WarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Customer
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.ToTable("customers");
+
+            entity.HasKey(c => c.Id);
+
+            entity.Property(c => c.FullName)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            entity.Property(c => c.Email)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            entity.HasIndex(c => c.Email)
+                .IsUnique();
+
+            entity.Property(c => c.Phone)
+                .HasMaxLength(50);
+
+            entity.Property(c => c.Address)
+                .HasMaxLength(200);
+
+            entity.Property(c => c.City)
+                .HasMaxLength(100);
+
+            entity.Property(c => c.PostalCode)
+                .HasMaxLength(20);
+
+            entity.Property(c => c.Note)
+                .HasMaxLength(1000);
+
+            entity.Property(c => c.IsActive)
+                .HasDefaultValue(true);
+
+            entity.Property(c => c.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasMany(c => c.Orders)
+                .WithOne(o => o.Customer)
+                .HasForeignKey(o => o.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Order
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("orders");
+
+            entity.HasKey(o => o.Id);
+
+            entity.Property(o => o.OrderNumber)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasIndex(o => o.OrderNumber)
+                .IsUnique();
+
+            entity.Property(o => o.OrderDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(o => o.Status)
+                .IsRequired();
+
+            entity.Property(o => o.DeliveryAddress)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(o => o.DeliveryCity)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(o => o.DeliveryPostalCode)
+                .HasMaxLength(20);
+
+            entity.Property(o => o.CustomerNote)
+                .HasMaxLength(1000);
+
+            entity.Property(o => o.InternalNote)
+                .HasMaxLength(1000);
+
+            entity.Property(o => o.CancellationReason)
+                .HasMaxLength(500);
+
+            entity.HasMany(o => o.Items)
+                .WithOne(i => i.Order)
+                .HasForeignKey(i => i.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // OrderItem
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("order_items", t =>
+            {
+                t.HasCheckConstraint("ck_order_items_quantity", "\"Quantity\" > 0");
+                t.HasCheckConstraint("ck_order_items_unit_price", "\"UnitPrice\" >= 0");
+            });
+
+            entity.HasKey(i => i.Id);
+
+            entity.Property(i => i.Quantity)
+                .IsRequired();
+
+            entity.Property(i => i.UnitPrice)
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            entity.HasOne(i => i.Product)
+                .WithMany()
+                .HasForeignKey(i => i.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

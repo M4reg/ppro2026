@@ -1,0 +1,191 @@
+@page
+@model Drevenka.Web.Pages.Orders.IndexModel
+@{
+    ViewData["Title"] = "Objednávky zákazníků";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Objednávky zákazníků</span>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show craft-card border-0 border-start border-success border-4 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+            <div>
+                <strong>Hotovo!</strong> @Model.SuccessMessage
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show craft-card border-0 border-start border-danger border-4 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill text-danger fs-4 me-3"></i>
+            <div>
+                <strong>Chyba!</strong> @Model.ErrorMessage
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1 fw-bold text-wood-dark">
+            <i class="bi bi-receipt text-wood-terracotta me-2"></i>Objednávky zákazníků
+        </h1>
+        <p class="text-muted small mb-0">Evidence přijatých objednávek, rezervace zásob a expedice z centrálního skladu.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="./Create" class="btn btn-wood-pine px-3 py-2 shadow-sm fw-semibold">
+            <i class="bi bi-plus-lg me-1"></i> Nová objednávka
+        </a>
+    </div>
+</div>
+
+<!-- Metriky objednávek -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="stat-box stat-box-pine">
+            <div class="text-muted extra-small fw-bold text-uppercase">Celkem objednávek</div>
+            <div class="display-6 fw-bold text-wood-dark font-monospace mt-1">@Model.TotalOrdersCount</div>
+            <div class="small text-muted mt-2">Všech evidovaných zakázek</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="stat-box stat-box-terracotta">
+            <div class="text-muted extra-small fw-bold text-uppercase">K expedici (Rezervováno)</div>
+            <div class="display-6 fw-bold text-wood-dark font-monospace mt-1">@Model.ConfirmedCount</div>
+            <div class="small text-wood-terracotta fw-semibold mt-2">Čeká na zabalení a výdej</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="stat-box stat-box-sand">
+            <div class="text-muted extra-small fw-bold text-uppercase">Expedováno</div>
+            <div class="display-6 fw-bold text-wood-dark font-monospace mt-1">@Model.DispatchedCount</div>
+            <div class="small text-success fw-semibold mt-2">Fyzicky odesláno zákazníkům</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="stat-box stat-box-pine">
+            <div class="text-muted extra-small fw-bold text-uppercase">Celkový obrat</div>
+            <div class="display-6 fw-bold text-wood-dark font-monospace mt-1">@Model.TotalRevenue.ToString("N0") Kč</div>
+            <div class="small text-muted mt-2">Bez stornovaných zakázek</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtrační lišta -->
+<div class="craft-card mb-4 p-3 bg-white">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-12 col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control border-start-0" placeholder="Hledat číslo objednávky, zákazníka, město...">
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4">
+            <select name="Status" class="form-select" onchange="this.form.submit()">
+                <option value="">Všechny stavy</option>
+                <option value="New" selected="@(Model.Status == Drevenka.Domain.Entities.OrderStatus.New)">Nová (čekající)</option>
+                <option value="Confirmed" selected="@(Model.Status == Drevenka.Domain.Entities.OrderStatus.Confirmed)">Potvrzená (se zásobami)</option>
+                <option value="Dispatched" selected="@(Model.Status == Drevenka.Domain.Entities.OrderStatus.Dispatched)">Expedovaná</option>
+                <option value="Cancelled" selected="@(Model.Status == Drevenka.Domain.Entities.OrderStatus.Cancelled)">Stornovaná</option>
+            </select>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-wood-pine w-100 fw-semibold">Filtrovat</button>
+            @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.Status.HasValue)
+            {
+                <a asp-page="./Index" class="btn btn-outline-secondary" title="Zrušit filtr"><i class="bi bi-x-lg"></i></a>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Tabulka objednávek -->
+@if (Model.Orders.Count == 0)
+{
+    <div class="craft-card p-5 text-center bg-white">
+        <i class="bi bi-inbox text-wood-terracotta display-4 mb-3 d-block"></i>
+        <h3 class="h5 fw-bold text-wood-dark mb-2">Žádné objednávky nebyly nalezeny</h3>
+        <p class="text-muted small mb-3">Zadaným kritériím neodpovídá žádná objednávka v evidenci.</p>
+        <a asp-page="./Create" class="btn btn-wood-pine btn-sm">Vytvořit první objednávku</a>
+    </div>
+}
+else
+{
+    <div class="craft-card bg-white p-0 overflow-hidden shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 craft-table">
+                <thead>
+                    <tr>
+                        <th class="ps-3 py-3">Číslo zakázky</th>
+                        <th>Zákazník</th>
+                        <th>Datum</th>
+                        <th class="text-center">Položek</th>
+                        <th class="text-end">Celková částka</th>
+                        <th class="text-center">Stav</th>
+                        <th class="text-end pe-3">Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td class="ps-3 py-3">
+                                <a asp-page="./Details" asp-route-id="@order.Id" class="fw-bold font-monospace text-wood-pine text-decoration-none">
+                                    @order.OrderNumber
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-wood-dark">@order.Customer.FullName</div>
+                                <div class="extra-small text-muted">@order.DeliveryCity, @order.Customer.Email</div>
+                            </td>
+                            <td class="small text-muted">
+                                @order.OrderDate.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border font-monospace">@order.TotalItemsCount ks</span>
+                            </td>
+                            <td class="text-end fw-bold font-monospace text-wood-dark">
+                                @order.TotalAmount.ToString("N2") Kč
+                            </td>
+                            <td class="text-center">
+                                @switch (order.Status)
+                                {
+                                    case Drevenka.Domain.Entities.OrderStatus.New:
+                                        <span class="badge bg-secondary">Nová</span>
+                                        break;
+                                    case Drevenka.Domain.Entities.OrderStatus.Confirmed:
+                                        <span class="badge bg-warning text-dark border border-warning"><i class="bi bi-bookmark-check me-1"></i>K expedici</span>
+                                        break;
+                                    case Drevenka.Domain.Entities.OrderStatus.Dispatched:
+                                        <span class="badge bg-success"><i class="bi bi-truck me-1"></i>Expedováno</span>
+                                        break;
+                                    case Drevenka.Domain.Entities.OrderStatus.Cancelled:
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Storno</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-end pe-3">
+                                <a asp-page="./Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-wood-pine fw-semibold">
+                                    Detail <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+

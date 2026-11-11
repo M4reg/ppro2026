@@ -258,6 +258,116 @@ public static class DatabaseSeeder
                 await dbContext.SaveChangesAsync(ct);
                 logger.LogInformation("Počáteční skladové zásoby a auditní logy úspěšně zavedeny.");
             }
+
+            // 5. Seedování zákazníků
+            if (!await dbContext.Customers.AnyAsync(ct))
+            {
+                logger.LogInformation("Vkládání výchozích syntetických zákazníků...");
+                var sampleCustomers = new List<Customer>
+                {
+                    new(
+                        fullName: "Jana Nováková",
+                        email: "jana.novakova@priklad.cz",
+                        phone: "+420 602 123 456",
+                        address: "Pospíšilova 312",
+                        city: "Hradec Králové",
+                        postalCode: "500 03",
+                        note: "Pravidelná zákaznice, dřevěné hračky pro mateřskou školu."
+                    ),
+                    new(
+                        fullName: "Martin Dvořák",
+                        email: "martin.dvorak@priklad.cz",
+                        phone: "+420 777 987 654",
+                        address: "Palackého náměstí 45",
+                        city: "Třebechovice pod Orebem",
+                        postalCode: "503 46",
+                        note: "Osobní odběr u garáže po telefonické domluvě."
+                    ),
+                    new(
+                        fullName: "Mateřská škola Sluníčko",
+                        email: "ms.slunicko@priklad.cz",
+                        phone: "+420 495 555 111",
+                        address: "Školská 89",
+                        city: "Pardubice",
+                        postalCode: "530 02",
+                        note: "Odběr větších sad kostek a pexes pro předškoláky."
+                    )
+                };
+
+                await dbContext.Customers.AddRangeAsync(sampleCustomers, ct);
+                await dbContext.SaveChangesAsync(ct);
+                logger.LogInformation("Výchozí zákazníci úspěšně vloženi ({Count} zákazníků).", sampleCustomers.Count);
+            }
+
+            // 6. Seedování ukázkových objednávek
+            if (!await dbContext.Orders.AnyAsync(ct))
+            {
+                logger.LogInformation("Vkládání ukázkových objednávek a demonstrace rezervací...");
+
+                var custJana = await dbContext.Customers.FirstAsync(c => c.Email == "jana.novakova@priklad.cz", ct);
+                var custMartin = await dbContext.Customers.FirstAsync(c => c.Email == "martin.dvorak@priklad.cz", ct);
+                var prodKaca = await dbContext.Products.FirstAsync(p => p.Code == "KAC-001", ct);
+                var prodVlacek = await dbContext.Products.FirstAsync(p => p.Code == "VLA-002", ct);
+                var prodKostky = await dbContext.Products.FirstAsync(p => p.Code == "KOS-003", ct);
+                var whMain = await dbContext.Warehouses.FirstAsync(w => w.IsMain, ct);
+
+                // Objednávka 1: Potvrzená s rezervací
+                var order1 = new Order(
+                    orderNumber: "OBJ-2026-0001",
+                    customerId: custJana.Id,
+                    deliveryAddress: custJana.Address,
+                    deliveryCity: custJana.City,
+                    deliveryPostalCode: custJana.PostalCode,
+                    customerNote: "Prosím o doručení do pátku.");
+                order1.AddItem(prodKaca.Id, 2, prodKaca.SellingPrice);
+                order1.AddItem(prodVlacek.Id, 1, prodVlacek.SellingPrice);
+                order1.Confirm();
+
+                // Rezervace na hlavním skladě
+                var stockKaca = await dbContext.StockItems.FirstAsync(s => s.ProductId == prodKaca.Id && s.WarehouseId == whMain.Id, ct);
+                stockKaca.ReserveStock(2);
+
+                var stockVlacek = await dbContext.StockItems.FirstAsync(s => s.ProductId == prodVlacek.Id && s.WarehouseId == whMain.Id, ct);
+                stockVlacek.ReserveStock(1);
+
+                await dbContext.Orders.AddAsync(order1, ct);
+
+                // Objednávka 2: Již expedovaná (fyzicky vyskladněno)
+                var order2 = new Order(
+                    orderNumber: "OBJ-2026-0002",
+                    customerId: custMartin.Id,
+                    deliveryAddress: custMartin.Address,
+                    deliveryCity: custMartin.City,
+                    deliveryPostalCode: custMartin.PostalCode,
+                    customerNote: "Vyzvednuto osobně.");
+                order2.AddItem(prodKostky.Id, 1, prodKostky.SellingPrice);
+                order2.Confirm();
+                order2.Dispatch();
+
+                // Provedeme fyzický výdej 1 ks kostek a auditní pohyb
+                var stockKostky = await dbContext.StockItems.FirstAsync(s => s.ProductId == prodKostky.Id && s.WarehouseId == whMain.Id, ct);
+                var prevQty = stockKostky.QuantityOnHand;
+                stockKostky.IssueStock(1);
+                var newQty = stockKostky.QuantityOnHand;
+
+                var movExpedice = new StockMovement(
+                    stockItemId: stockKostky.Id,
+                    productId: prodKostky.Id,
+                    warehouseId: whMain.Id,
+                    movementType: StockMovementType.Issue,
+                    quantity: 1,
+                    previousQuantity: prevQty,
+                    newQuantity: newQty,
+                    note: "Fyzická expedice zákaznické objednávky č. OBJ-2026-0002 pro Martin Dvořák",
+                    referenceNumber: "OBJ-2026-0002",
+                    performedBy: "Petr Doležal");
+
+                await dbContext.Orders.AddAsync(order2, ct);
+                await dbContext.StockMovements.AddAsync(movExpedice, ct);
+
+                await dbContext.SaveChangesAsync(ct);
+                logger.LogInformation("Ukázkové objednávky úspěšně založeny.");
+            }
         }
         catch (Exception ex)
         {

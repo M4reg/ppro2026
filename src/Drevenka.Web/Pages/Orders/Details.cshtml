@@ -1,0 +1,231 @@
+@page "{id:int}"
+@model Drevenka.Web.Pages.Orders.DetailsModel
+@{
+    ViewData["Title"] = $"Objednávka {Model.Order.OrderNumber}";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <a asp-page="./Index">Objednávky</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">@Model.Order.OrderNumber</span>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show craft-card border-0 border-start border-success border-4 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+            <div>
+                <strong>Hotovo!</strong> @Model.SuccessMessage
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show craft-card border-0 border-start border-danger border-4 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill text-danger fs-4 me-3"></i>
+            <div>
+                <strong>Chyba!</strong> @Model.ErrorMessage
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+<!-- Hlavička zakázky -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-3 mb-1">
+            <h1 class="h2 mb-0 fw-bold text-wood-dark font-monospace">@Model.Order.OrderNumber</h1>
+            @switch (Model.Order.Status)
+            {
+                case Drevenka.Domain.Entities.OrderStatus.New:
+                    <span class="badge bg-secondary fs-6">Nová (čekající)</span>
+                    break;
+                case Drevenka.Domain.Entities.OrderStatus.Confirmed:
+                    <span class="badge bg-warning text-dark border border-warning fs-6"><i class="bi bi-bookmark-check me-1"></i>K expedici (Zarezervováno)</span>
+                    break;
+                case Drevenka.Domain.Entities.OrderStatus.Dispatched:
+                    <span class="badge bg-success fs-6"><i class="bi bi-truck me-1"></i>Expedováno</span>
+                    break;
+                case Drevenka.Domain.Entities.OrderStatus.Cancelled:
+                    <span class="badge bg-danger fs-6"><i class="bi bi-x-circle me-1"></i>Storno</span>
+                    break;
+            }
+        </div>
+        <p class="text-muted small mb-0">Zadáno dne @Model.Order.OrderDate.ToString("dd.MM.yyyy ve HH:mm")</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="./Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Zpět
+        </a>
+        @if (Model.Order.Status == Drevenka.Domain.Entities.OrderStatus.Confirmed)
+        {
+            <form method="post" asp-page-handler="Dispatch" asp-route-id="@Model.Order.Id" onsubmit="return confirm('Opravdu chcete objednávku fyzicky expedovat? Dojde k odepsání zásob ze skladu a zápisu auditního pohybu.')">
+                <button type="submit" class="btn btn-wood-pine shadow-sm fw-semibold">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Fyzicky expedovat
+                </button>
+            </form>
+            <form method="post" asp-page-handler="Cancel" asp-route-id="@Model.Order.Id" onsubmit="return confirm('Opravdu chcete objednávku stornovat? Rezervované zásoby se uvolní zpět k prodeji.')">
+                <button type="submit" class="btn btn-outline-danger fw-semibold">
+                    <i class="bi bi-x-circle me-1"></i> Stornovat
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Informace o zákazníkovi a adrese -->
+    <div class="col-12 col-md-4">
+        <div class="craft-card bg-white p-4 h-100 shadow-sm">
+            <h2 class="h6 fw-bold text-wood-dark mb-3 text-uppercase border-bottom pb-2">
+                <i class="bi bi-person text-wood-pine me-2"></i>Zákazník
+            </h2>
+            <div class="fw-bold fs-5 text-wood-dark mb-1">@Model.Order.Customer.FullName</div>
+            <div class="small text-muted mb-2"><i class="bi bi-envelope me-1"></i>@Model.Order.Customer.Email</div>
+            <div class="small text-muted mb-3"><i class="bi bi-telephone me-1"></i>@Model.Order.Customer.Phone</div>
+
+            <h3 class="extra-small fw-bold text-uppercase text-muted mt-3 mb-1">Dodací adresa:</h3>
+            <div class="small text-wood-dark">
+                @Model.Order.DeliveryAddress<br />
+                @Model.Order.DeliveryPostalCode @Model.Order.DeliveryCity
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Order.CustomerNote))
+            {
+                <div class="mt-3 p-2 bg-light border rounded small">
+                    <strong class="text-wood-dark d-block mb-1"><i class="bi bi-chat-left-text me-1"></i>Poznámka:</strong>
+                    @Model.Order.CustomerNote
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Stav a auditní informace o objednávce -->
+    <div class="col-12 col-md-8">
+        <div class="craft-card bg-white p-4 h-100 shadow-sm">
+            <h2 class="h6 fw-bold text-wood-dark mb-3 text-uppercase border-bottom pb-2">
+                <i class="bi bi-clock-history text-wood-pine me-2"></i>Stav vyřízení & Audit
+            </h2>
+            <div class="row g-3">
+                <div class="col-12 col-sm-6">
+                    <div class="stat-box stat-box-sand p-3">
+                        <span class="text-muted extra-small fw-bold text-uppercase">Rezervace na centrále</span>
+                        <div class="fw-bold text-wood-dark mt-1">
+                            @if (Model.Order.Status == Drevenka.Domain.Entities.OrderStatus.Confirmed)
+                            {
+                                <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Zboží blokováno v regálech</span>
+                            }
+                            else if (Model.Order.Status == Drevenka.Domain.Entities.OrderStatus.Dispatched)
+                            {
+                                <span class="text-primary"><i class="bi bi-check-all me-1"></i>Zboží vydáno a odesláno</span>
+                            }
+                            else if (Model.Order.Status == Drevenka.Domain.Entities.OrderStatus.Cancelled)
+                            {
+                                <span class="text-danger"><i class="bi bi-slash-circle me-1"></i>Rezervace uvolněna</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="stat-box stat-box-pine p-3">
+                        <span class="text-muted extra-small fw-bold text-uppercase">Celková hodnota</span>
+                        <div class="fs-4 fw-bold font-monospace text-wood-dark mt-1">
+                            @Model.Order.TotalAmount.ToString("N2") Kč
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top small text-muted">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Vytvořeno v systému:</span>
+                    <strong class="text-wood-dark">@Model.Order.OrderDate.ToString("dd.MM.yyyy HH:mm:ss")</strong>
+                </div>
+                @if (Model.Order.ConfirmedAt.HasValue)
+                {
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Potvrzeno a zarezervováno:</span>
+                        <strong class="text-wood-dark">@Model.Order.ConfirmedAt.Value.ToString("dd.MM.yyyy HH:mm:ss")</strong>
+                    </div>
+                }
+                @if (Model.Order.DispatchedAt.HasValue)
+                {
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Fyzicky expedováno ze skladu:</span>
+                        <strong class="text-success">@Model.Order.DispatchedAt.Value.ToString("dd.MM.yyyy HH:mm:ss")</strong>
+                    </div>
+                }
+                @if (Model.Order.CancelledAt.HasValue)
+                {
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Stornováno dne:</span>
+                        <strong class="text-danger">@Model.Order.CancelledAt.Value.ToString("dd.MM.yyyy HH:mm:ss") (@Model.Order.CancellationReason)</strong>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seznam položek objednávky -->
+<div class="craft-card bg-white p-0 overflow-hidden shadow-sm mb-4">
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h2 class="h5 fw-bold text-wood-dark mb-0">
+            <i class="bi bi-box-seam text-wood-terracotta me-2"></i>Objednané položky
+        </h2>
+        <span class="small text-muted">Historické prodejní ceny jsou snapshotem v čase objednávky</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 craft-table">
+            <thead>
+                <tr>
+                    <th class="ps-3 py-3">Produkt</th>
+                    <th class="text-center">SKU Kód</th>
+                    <th class="text-center">Objednané množství</th>
+                    <th class="text-end">Jednotková cena</th>
+                    <th class="text-end pe-3">Celkem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Order.Items)
+                {
+                    <tr>
+                        <td class="ps-3 py-3">
+                            <span class="fw-bold text-wood-dark">@item.Product.Name</span>
+                        </td>
+                        <td class="text-center font-monospace text-muted">
+                            @item.Product.Code
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border font-monospace fs-6">@item.Quantity ks</span>
+                        </td>
+                        <td class="text-end font-monospace text-muted">
+                            @item.UnitPrice.ToString("N2") Kč
+                        </td>
+                        <td class="text-end pe-3 font-monospace fw-bold text-wood-dark">
+                            @item.TotalPrice.ToString("N2") Kč
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="table-light">
+                    <td colspan="4" class="text-end fw-bold py-3">Celková částka k úhradě:</td>
+                    <td class="text-end pe-3 fw-bold font-monospace fs-5 text-wood-pine py-3">
+                        @Model.Order.TotalAmount.ToString("N2") Kč
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+

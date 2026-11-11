@@ -1,0 +1,124 @@
+@page
+@model Drevenka.Web.Pages.Customers.IndexModel
+@{
+    ViewData["Title"] = "Zákazníci";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Evidence zákazníků</span>
+</div>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1 fw-bold text-wood-dark">
+            <i class="bi bi-people text-wood-terracotta me-2"></i>Evidence zákazníků
+        </h1>
+        <p class="text-muted small mb-0">Adresář zákazníků e-shopu a odběratelů pro doručování objednávek (zákazníci se z databáze nemažou).</p>
+    </div>
+</div>
+
+<!-- Statistiky zákazníků -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="stat-box stat-box-pine">
+            <div class="text-muted extra-small fw-bold text-uppercase">Evidovaných zákazníků</div>
+            <div class="display-6 fw-bold text-wood-dark font-monospace mt-1">@Model.TotalCustomersCount</div>
+            <div class="small text-muted mt-2">Trvalý archiv všech zákaznických profilů</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="stat-box stat-box-terracotta">
+            <div class="text-muted extra-small fw-bold text-uppercase">Aktivní odběratelé</div>
+            <div class="display-6 fw-bold text-wood-dark font-monospace mt-1">@Model.ActiveCustomersCount</div>
+            <div class="small text-muted mt-2">Aktivní pro zadávání nových objednávek</div>
+        </div>
+    </div>
+</div>
+
+<!-- Vyhledávání -->
+<div class="craft-card mb-4 p-3 bg-white">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-12 col-md-9">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control border-start-0" placeholder="Hledat podle jména, e-mailu, telefonu, města...">
+            </div>
+        </div>
+        <div class="col-12 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-wood-pine w-100 fw-semibold">Vyhledat</button>
+            @if (!string.IsNullOrEmpty(Model.SearchTerm))
+            {
+                <a asp-page="./Index" class="btn btn-outline-secondary" title="Zrušit filtr"><i class="bi bi-x-lg"></i></a>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Seznam zákazníků -->
+@if (Model.Customers.Count == 0)
+{
+    <div class="craft-card p-5 text-center bg-white">
+        <i class="bi bi-people text-wood-terracotta display-4 mb-3 d-block"></i>
+        <h3 class="h5 fw-bold text-wood-dark mb-2">Žádní zákazníci nenalezeni</h3>
+        <p class="text-muted small mb-0">Zadanému vyhledávání neodpovídá žádný zákazník v evidenci.</p>
+    </div>
+}
+else
+{
+    <div class="craft-card bg-white p-0 overflow-hidden shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 craft-table">
+                <thead>
+                    <tr>
+                        <th class="ps-3 py-3">Zákazník</th>
+                        <th>Kontakt</th>
+                        <th>Dodací adresa</th>
+                        <th class="text-center">Počet objednávek</th>
+                        <th class="text-center pe-3">Stav</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cust in Model.Customers)
+                    {
+                        <tr>
+                            <td class="ps-3 py-3">
+                                <div class="fw-bold text-wood-dark">@cust.FullName</div>
+                                @if (!string.IsNullOrEmpty(cust.Note))
+                                {
+                                    <div class="extra-small text-muted fst-italic">@cust.Note</div>
+                                }
+                            </td>
+                            <td>
+                                <div class="small text-wood-dark"><i class="bi bi-envelope me-1 text-muted"></i>@cust.Email</div>
+                                <div class="small text-muted"><i class="bi bi-telephone me-1 text-muted"></i>@cust.Phone</div>
+                            </td>
+                            <td>
+                                <div class="small text-wood-dark">@cust.Address</div>
+                                <div class="extra-small text-muted">@cust.PostalCode @cust.City</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border font-monospace fs-6">
+                                    @cust.Orders.Count
+                                </span>
+                            </td>
+                            <td class="text-center pe-3">
+                                @if (cust.IsActive)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Aktivní</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary border">Neaktivní</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
