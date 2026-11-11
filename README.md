@@ -147,10 +147,10 @@ erDiagram
 | :--- | :---: | :--- |
 | **Třívrstvá architektura** | **Splněno** | Přísně oddělená doména (`Drevenka.Domain`), datová vrstva (`Drevenka.Infrastructure`) a prezentační vrstva (`Drevenka.Web`) se závislostmi jedním směrem. |
 | **Relační databáze v Dockeru** | **Splněno** | Databáze PostgreSQL 16 kontejnerizována v `docker-compose.yml` se zdravotní kontrolou (healthcheck). |
-| **Databázové migrace** | **Splněno** | Verzované migrace řízené přes Entity Framework Core (`20260930142056_InitialCreateProduct`). |
-| **Minimálně 5 entit** | V realizaci (demo: 1. entita `Product`) | Navrženo 11 entit; v úvodním demu plně zprovozněna klíčová entita `Product` s validacemi cen a unikátností SKU kódů. |
-| **Alespoň jedna vazba M:N** | V návrhu | Navržena vazba `Product` ↔ `Category` (bude realizována v další fázi). |
-| **Automatizované testy** | **Splněno** | 14 automatizovaných jednotkových testů v `tests/Drevenka.Domain.Tests` pokrývajících doménová pravidla a aplikační logiku. |
+| **Databázové migrace** | **Splněno** | Verzované migrace řízené přes Entity Framework Core (`20261006145553_InitialCreate`, `20261104160000_AddCategoriesAndProductCategory`, `20261104170000_AddWarehousesAndStockMovements`). |
+| **Minimálně 5 entit** | **Splněno** (6 z 5: `Product`, `Category`, `ProductCategory`, `Warehouse`, `StockItem`, `StockMovement`) | Plně implementováno a perzistováno 6 entit pokrývajících produkty, kategorie, sklady, stav zásob a auditní historii pohybů. |
+| **Alespoň jedna vazba M:N** | **Splněno** | Plně implementována vazba M:N `Product` ↔ `Category` přes vazební entitu `ProductCategory` (produkt může patřit do více kategorií současně, kategorie sdružuje více produktů). |
+| **Automatizované testy** | **Splněno** | 31 automatizovaných jednotkových testů v `tests/Drevenka.Domain.Tests` pokrývajících doménová pravidla produktů, kategorií, služeb a relace M:N. |
 | **Spuštění přes docker compose up**| **Splněno** | Celý systém (DB + Web) je sestavitelný a spustitelný jediným příkazem `docker compose up --build`. |
 | **Technická dokumentace** | **Splněno** | [README.md](file:///u:/ppro2026/README.md) slouží jako jediný zdroj pravdy a průběžně se aktualizuje. |
 | **Syntetická data bez hesel** | **Splněno** | Inicializační seeder automaticky vkládá 5 syntetických dřevěných hraček (káča, vláček, kostky, koník, pexeso); hesla nejsou uložena v kódu. |
@@ -188,6 +188,32 @@ dotnet run --project src/Drevenka.Web/Drevenka.Web.csproj
 ---
 
 ## 7. Deník změn a rozhodnutí (Changelog & Progress Log)
+
+- **2026-11-11 (Fáze 4: Implementace skladů, skladových zásob a auditní historie pohybů):**
+  - **Doménový model**: Implementovány entity `Warehouse`, `StockItem` (fyzická zásoba, rezervace, disponibilní množství, minimální bezpečné zásoby) a `StockMovement` (auditní log pohybů s typy `StockMovementType`: příjem, výdej, převod, inventurní vyrovnání).
+  - **Repozitáře a aplikační služby**: Vytvořena rozhraní `IWarehouseRepository`, `IStockRepository` a komplexní doménová služba `StockService` zajišťující atomické skladové operace, validaci zákazu výdeje do záporu a evidenci auditní stopy.
+  - **Infrastruktura a PostgreSQL migrace**: Do `DrevenkaDbContext` zavedeny tabulky `warehouses`, `stock_items` (s integritním omezením `QuantityOnHand >= 0`) a `stock_movements`. Vytvořena migrace `20261104170000_AddWarehousesAndStockMovements`.
+  - **Syntetická data (Seeder)**: Seeder rozšířen o výchozí sklady (*Hlavní sklad Hradec Králové* a *Sklad Třebechovice pod Orebem*) a rozdělení počátečních zásob hraček s auditními záznamy.
+  - **Uživatelské rozhraní (Razor Pages)**:
+    - Vytvořena sekce `Pages/Warehouse`:
+      - `Index`: Přehled stavu zásob po skladech, filtrace, indikace nízkého stavu a agregované součty.
+      - `Movements`: Auditní historie všech pohybů s možností filtrace dle skladu a produktu.
+      - `Operations`: Formulář pro provádění skladových operací (naskladnění, vyskladnění, přesun mezi sklady, inventurní úprava).
+    - Hlavní navigace v `_Layout.cshtml` rozšířena o sekci *Zásoby & Sklady*.
+
+- **2026-11-04 (Fáze 3: Implementace kategorií a vazby M:N mezi produkty a kategoriemi):**
+  - **Doménový model**: Vytvořena entita `Category` s validacemi unikátnosti názvů a vazební entita `ProductCategory` pro plnohodnotný vztah M:N.
+  - **Rozšíření entity Product**: Doplněna navigace na kolekci `ProductCategories` a metody `AddCategory`, `RemoveCategory` a `SetCategories` pro atomickou synchronizaci.
+  - **Repozitáře a aplikační služby**: Vytvořeno rozhraní `ICategoryRepository` a doménová služba `CategoryService` s ochranou proti duplicitám. Rozšířeno `IProductRepository` a `ProductService` o načítání a parametrické filtrování dle kategorií.
+  - **Infrastruktura a PostgreSQL migrace**: Do `DrevenkaDbContext` doplněno mapování tabulek `categories` a `product_categories` (složený primární klíč `(ProductId, CategoryId)`, unikátní index na název kategorie, kaskádní integrita). Vytvořena nová verzovaná migrace `20261104160000_AddCategoriesAndProductCategory` a aktualizován model snapshot.
+  - **Syntetická data (Seeder)**: Rozšířen `DatabaseSeeder` o automatické vložení 5 tematických kategorií (*Dřevěné hračky, Pro nejmenší, Dárky do 300 Kč, Dopravní prostředky, Stavebnice a hry*) a demonstraci M:N propojení na syntetické hračky.
+  - **Uživatelské rozhraní (Razor Pages)**:
+    - Vytvořena kompletní správa kategorií v `Pages/Categories` (`Index`, `Create`, `Edit`) s aktivací/deaktivací a indikací počtu zařazených produktů.
+    - Katalog produktů (`Products/Index`) rozšířen o filtr podle kategorií a zobrazení štítků kategorií u jednotlivých položek v tabulce i na mobilních kartách.
+    - Formuláře `Create` a `Edit` produktu doplněny o výběr z dostupných kategorií (M:N zařazení).
+    - Detail produktu doplněn o interaktivní odznaky kategorií s proklikem na filtrovaný katalog.
+    - Hlavní navigace v `_Layout.cshtml` rozšířena o odkaz na Kategorie.
+  - **Automatizované testy**: Sada jednotkových testů rozšířena z 14 na **31 testů** (100% úspěšnost) pokrývajících nově `CategoryTests`, `ProductCategoryTests` a `CategoryServiceTests`.
 
 - **2026-10-21 (Oprava PostgreSQL datových typů v počáteční migraci):**
   - **Oprava migrace InitialCreate**: Opraveny datové typy a anotace v migračním souboru `20261006145553_InitialCreate.cs` a designeru z pozůstatků SQLite (`TEXT`, `INTEGER`) na korektní Npgsql/PostgreSQL typy (`character varying`, `numeric(18,2)`, `boolean`, `integer`).

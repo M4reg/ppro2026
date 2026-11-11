@@ -1,0 +1,192 @@
+@page
+@model Drevenka.Web.Pages.WarehousePages.OperationsModel
+@{
+    ViewData["Title"] = "Skladové operace";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <a asp-page="./Index">Přehled skladu</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Skladové operace</span>
+</div>
+
+<div class="mb-4">
+    <h1 class="h2 fw-bold text-wood-dark mb-1">
+        <i class="bi bi-arrow-left-right text-wood-terracotta me-2"></i>Skladové operace & Pohyby
+    </h1>
+    <p class="text-muted small">Příjem zboží z dílny, výdej, meziskladový přesun (Hradec Králové ↔ Třebechovice) nebo inventurní vyrovnání.</p>
+</div>
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm p-4">
+            <form method="post" id="operationForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm border-0 bg-danger-subtle text-danger-emphasis mb-4" role="alert"></div>
+
+                <!-- Výběr typu operace -->
+                <div class="mb-4">
+                    <label class="form-label extra-small text-uppercase fw-bold text-wood-dark mb-2">Zvolte typ skladové operace</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="Input.OperationType" id="opReceive" value="receive" @(Model.Input.OperationType == "receive" ? "checked" : "") onchange="updateFormMode()">
+                        <label class="btn btn-outline-wood-pine fw-semibold" for="opReceive"><i class="bi bi-box-arrow-in-down me-1"></i> Příjem</label>
+
+                        <input type="radio" class="btn-check" name="Input.OperationType" id="opIssue" value="issue" @(Model.Input.OperationType == "issue" ? "checked" : "") onchange="updateFormMode()">
+                        <label class="btn btn-outline-wood-pine fw-semibold" for="opIssue"><i class="bi bi-box-arrow-up me-1"></i> Výdej</label>
+
+                        <input type="radio" class="btn-check" name="Input.OperationType" id="opTransfer" value="transfer" @(Model.Input.OperationType == "transfer" ? "checked" : "") onchange="updateFormMode()">
+                        <label class="btn btn-outline-wood-pine fw-semibold" for="opTransfer"><i class="bi bi-truck me-1"></i> Přesun skladů</label>
+
+                        <input type="radio" class="btn-check" name="Input.OperationType" id="opAdjust" value="adjust" @(Model.Input.OperationType == "adjust" ? "checked" : "") onchange="updateFormMode()">
+                        <label class="btn btn-outline-wood-pine fw-semibold" for="opAdjust"><i class="bi bi-clipboard-check me-1"></i> Inventura</label>
+                    </div>
+                </div>
+
+                <!-- Produkt -->
+                <div class="mb-3">
+                    <label asp-for="Input.ProductId" class="form-label fw-bold text-wood-dark"></label>
+                    <select asp-for="Input.ProductId" asp-items="Model.ProductOptions" class="form-select border-wood-sand">
+                        <option value="">-- Zvolte produkt ze sortimentu --</option>
+                    </select>
+                    <span asp-validation-for="Input.ProductId" class="text-danger small"></span>
+                </div>
+
+                <!-- Zdrojový / Hlavní sklad -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6" id="sourceWarehouseCol">
+                        <label asp-for="Input.WarehouseId" class="form-label fw-bold text-wood-dark" id="sourceWarehouseLabel">Sklad</label>
+                        <select asp-for="Input.WarehouseId" asp-items="Model.WarehouseOptions" class="form-select border-wood-sand">
+                            <option value="">-- Zvolte sklad --</option>
+                        </select>
+                        <span asp-validation-for="Input.WarehouseId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Cílový sklad (pouze pro přesun) -->
+                    <div class="col-12 col-md-6" id="targetWarehouseCol" style="display: none;">
+                        <label asp-for="Input.TargetWarehouseId" class="form-label fw-bold text-wood-dark">Cílový sklad (kam naskladnit)</label>
+                        <select asp-for="Input.TargetWarehouseId" asp-items="Model.WarehouseOptions" class="form-select border-wood-sand">
+                            <option value="">-- Zvolte cílový sklad --</option>
+                        </select>
+                        <span asp-validation-for="Input.TargetWarehouseId" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Množství (pro příjem, výdej, přesun) -->
+                <div class="mb-3" id="quantityField">
+                    <label asp-for="Input.Quantity" class="form-label fw-bold text-wood-dark"></label>
+                    <div class="input-group" style="max-width: 250px;">
+                        <input type="number" asp-for="Input.Quantity" min="1" class="form-control border-wood-sand font-monospace fs-5 text-end" />
+                        <span class="input-group-text bg-white border-wood-sand">ks</span>
+                    </div>
+                    <span asp-validation-for="Input.Quantity" class="text-danger small"></span>
+                </div>
+
+                <!-- Skutečný počet zjištěný inventurou -->
+                <div class="mb-3" id="actualCountField" style="display: none;">
+                    <label asp-for="Input.ActualCount" class="form-label fw-bold text-wood-dark">Skutečně zjištěný počet kusů na regále</label>
+                    <div class="input-group" style="max-width: 250px;">
+                        <input type="number" asp-for="Input.ActualCount" min="0" class="form-control border-wood-sand font-monospace fs-5 text-end" placeholder="0" />
+                        <span class="input-group-text bg-white border-wood-sand">ks</span>
+                    </div>
+                    <div class="form-text small">Systém automaticky vypočte rozdíl oproti evidovanému stavu a zaeviduje inventurní manko či přebytek.</div>
+                    <span asp-validation-for="Input.ActualCount" class="text-danger small"></span>
+                </div>
+
+                <!-- Referenční číslo dokladu -->
+                <div class="mb-3" id="referenceField">
+                    <label asp-for="Input.ReferenceNumber" class="form-label fw-bold text-wood-dark"></label>
+                    <input asp-for="Input.ReferenceNumber" class="form-control border-wood-sand" placeholder="Např. Číslo faktury dodavatele, kód zakázky, číslo objednávky..." />
+                </div>
+
+                <!-- Odůvodnění / Poznámka -->
+                <div class="mb-3">
+                    <label asp-for="Input.Note" class="form-label fw-bold text-wood-dark" id="noteLabel">Poznámka k pohybu</label>
+                    <textarea asp-for="Input.Note" class="form-control border-wood-sand" rows="2" placeholder="Doplňující informace pro auditní stopu (u inventury povinné odůvodnění)..."></textarea>
+                    <span asp-validation-for="Input.Note" class="text-danger small"></span>
+                </div>
+
+                <!-- Osoba provádějící -->
+                <div class="mb-4">
+                    <label asp-for="Input.PerformedBy" class="form-label extra-small text-uppercase fw-bold text-wood-dark"></label>
+                    <input asp-for="Input.PerformedBy" class="form-control border-wood-sand" style="max-width: 300px;" />
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a asp-page="./Index" class="btn btn-outline-wood-pine">
+                        <i class="bi bi-arrow-left me-1"></i> Zpět na přehled
+                    </a>
+                    <button type="submit" class="btn btn-wood-pine px-4 fw-semibold shadow-sm" id="submitBtn">
+                        <i class="bi bi-check-lg me-1"></i> Potvrdit operaci
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pravý sloupec s pravidly skladu -->
+    <div class="col-12 col-lg-4 mt-4 mt-lg-0">
+        <div class="card border-0 shadow-sm p-4 bg-wood-sand-subtle border-wood-sand mb-3">
+            <h5 class="fw-bold text-wood-dark mb-3"><i class="bi bi-shield-check text-wood-terracotta me-2"></i>Vynucovaná pravidla skladu</h5>
+            <ul class="list-unstyled small d-flex flex-column gap-2 mb-0 text-muted">
+                <li>
+                    <i class="bi bi-check2-circle text-wood-pine me-2"></i><strong>Zákaz výdeje do záporu:</strong> Systém nikdy nedovolí vydat více kusů, než je fyzicky přítomno na vybraném skladě.
+                </li>
+                <li>
+                    <i class="bi bi-check2-circle text-wood-pine me-2"></i><strong>Dvoustupňový model:</strong> Rezervace chrání zboží pro zákazníky e-shopu před nechtěným prodejem.
+                </li>
+                <li>
+                    <i class="bi bi-check2-circle text-wood-pine me-2"></i><strong>Přesun HK ↔ Garáž:</strong> Vždy atomicky odepíše zásobu z jednoho skladu a připíše na druhý s vazbou na převodku.
+                </li>
+                <li>
+                    <i class="bi bi-check2-circle text-wood-pine me-2"></i><strong>Neměnný audit:</strong> Každý pohyb zaznamená čas, množství a stav před/po.
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function updateFormMode() {
+            const opType = document.querySelector('input[name="Input.OperationType"]:checked').value;
+            const targetCol = document.getElementById('targetWarehouseCol');
+            const sourceLabel = document.getElementById('sourceWarehouseLabel');
+            const qtyField = document.getElementById('quantityField');
+            const actualField = document.getElementById('actualCountField');
+            const noteLabel = document.getElementById('noteLabel');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (opType === 'transfer') {
+                targetCol.style.display = 'block';
+                sourceLabel.innerText = 'Zdrojový sklad (odkud vzít)';
+                qtyField.style.display = 'block';
+                actualField.style.display = 'none';
+                noteLabel.innerText = 'Poznámka k převozu';
+                submitBtn.innerHTML = '<i class="bi bi-truck me-1"></i> Provést meziskladový přesun';
+            } else if (opType === 'adjust') {
+                targetCol.style.display = 'none';
+                sourceLabel.innerText = 'Sklad podléhající inventuře';
+                qtyField.style.display = 'none';
+                actualField.style.display = 'block';
+                noteLabel.innerHTML = 'Odůvodnění inventurního manka/přebytku <span class="text-danger">*</span>';
+                submitBtn.innerHTML = '<i class="bi bi-clipboard-check me-1"></i> Zaevidovat inventurní stav';
+            } else {
+                targetCol.style.display = 'none';
+                sourceLabel.innerText = 'Sklad';
+                qtyField.style.display = 'block';
+                actualField.style.display = 'none';
+                noteLabel.innerText = 'Poznámka k pohybu';
+                if (opType === 'receive') {
+                    submitBtn.innerHTML = '<i class="bi bi-box-arrow-in-down me-1"></i> Naskladnit zboží';
+                } else {
+                    submitBtn.innerHTML = '<i class="bi bi-box-arrow-up me-1"></i> Vyskladnit zboží';
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateFormMode);
+    </script>
+}
+

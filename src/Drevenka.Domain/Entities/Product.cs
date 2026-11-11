@@ -49,6 +49,30 @@ public class Product
     /// </summary>
     public DateTime? UpdatedAt { get; private set; }
 
+    private readonly List<ProductCategory> _productCategories = [];
+
+    /// <summary>
+    /// Vazby M:N na kategorie, do kterých je tento produkt zařazen.
+    /// </summary>
+    public IReadOnlyCollection<ProductCategory> ProductCategories => _productCategories.AsReadOnly();
+
+    private readonly List<StockItem> _stockItems = [];
+
+    /// <summary>
+    /// Stavy zásob produktu na jednotlivých skladech.
+    /// </summary>
+    public IReadOnlyCollection<StockItem> StockItems => _stockItems.AsReadOnly();
+
+    /// <summary>
+    /// Celková fyzická zásoba na všech skladech dohromady.
+    /// </summary>
+    public int TotalQuantityOnHand => _stockItems.Sum(s => s.QuantityOnHand);
+
+    /// <summary>
+    /// Celková disponibilní (volná) zásoba k okamžitému prodeji na e-shopu.
+    /// </summary>
+    public int TotalAvailableQuantity => _stockItems.Sum(s => s.AvailableQuantity);
+
     // Pro Entity Framework Core
     protected Product()
     {
@@ -82,6 +106,58 @@ public class Product
     public void Activate()
     {
         IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Přiřazení kategorie k produktu (pokud ještě není přiřazena).
+    /// </summary>
+    public void AddCategory(int categoryId)
+    {
+        if (categoryId <= 0)
+        {
+            throw new DomainException("Neplatné ID kategorie.");
+        }
+
+        if (!_productCategories.Any(pc => pc.CategoryId == categoryId))
+        {
+            _productCategories.Add(new ProductCategory(Id, categoryId));
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    /// <summary>
+    /// Odebrání kategorie z produktu.
+    /// </summary>
+    public void RemoveCategory(int categoryId)
+    {
+        var existing = _productCategories.FirstOrDefault(pc => pc.CategoryId == categoryId);
+        if (existing != null)
+        {
+            _productCategories.Remove(existing);
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    /// <summary>
+    /// Synchronizace přiřazených kategorií produktu podle dodaného seznamu ID.
+    /// </summary>
+    public void SetCategories(IEnumerable<int> categoryIds)
+    {
+        var targetIds = categoryIds.Where(id => id > 0).Distinct().ToHashSet();
+
+        // Odebereme ty, které v novém seznamu nejsou
+        _productCategories.RemoveAll(pc => !targetIds.Contains(pc.CategoryId));
+
+        // Přidáme ty, které v seznamu ještě nejsou
+        foreach (var id in targetIds)
+        {
+            if (!_productCategories.Any(pc => pc.CategoryId == id))
+            {
+                _productCategories.Add(new ProductCategory(Id, id));
+            }
+        }
+
         UpdatedAt = DateTime.UtcNow;
     }
 

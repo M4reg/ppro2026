@@ -6,10 +6,10 @@ namespace Drevenka.Domain.Services;
 
 public interface IProductService
 {
-    Task<IReadOnlyList<Product>> GetAllProductsAsync(string? search = null, bool onlyActive = false, CancellationToken ct = default);
+    Task<IReadOnlyList<Product>> GetAllProductsAsync(string? search = null, int? categoryId = null, bool onlyActive = false, CancellationToken ct = default);
     Task<Product?> GetProductByIdAsync(int id, CancellationToken ct = default);
-    Task<Product> CreateProductAsync(string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, CancellationToken ct = default);
-    Task<Product> UpdateProductAsync(int id, string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, bool isActive, CancellationToken ct = default);
+    Task<Product> CreateProductAsync(string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, IEnumerable<int>? categoryIds = null, CancellationToken ct = default);
+    Task<Product> UpdateProductAsync(int id, string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, bool isActive, IEnumerable<int>? categoryIds = null, CancellationToken ct = default);
     Task DeleteProductAsync(int id, CancellationToken ct = default);
 }
 
@@ -22,9 +22,9 @@ public class ProductService : IProductService
         _productRepository = productRepository;
     }
 
-    public async Task<IReadOnlyList<Product>> GetAllProductsAsync(string? search = null, bool onlyActive = false, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Product>> GetAllProductsAsync(string? search = null, int? categoryId = null, bool onlyActive = false, CancellationToken ct = default)
     {
-        return await _productRepository.GetAllAsync(search, onlyActive, ct);
+        return await _productRepository.GetAllAsync(search, categoryId, onlyActive, ct);
     }
 
     public async Task<Product?> GetProductByIdAsync(int id, CancellationToken ct = default)
@@ -32,7 +32,7 @@ public class ProductService : IProductService
         return await _productRepository.GetByIdAsync(id, ct);
     }
 
-    public async Task<Product> CreateProductAsync(string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, CancellationToken ct = default)
+    public async Task<Product> CreateProductAsync(string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, IEnumerable<int>? categoryIds = null, CancellationToken ct = default)
     {
         var normalizedCode = code?.Trim().ToUpperInvariant() ?? string.Empty;
         if (await _productRepository.ExistsCodeAsync(normalizedCode, ct: ct))
@@ -41,11 +41,17 @@ public class ProductService : IProductService
         }
 
         var product = new Product(normalizedCode, name, description, purchasePrice, sellingPrice);
+
+        if (categoryIds != null)
+        {
+            product.SetCategories(categoryIds);
+        }
+
         await _productRepository.AddAsync(product, ct);
         return product;
     }
 
-    public async Task<Product> UpdateProductAsync(int id, string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, bool isActive, CancellationToken ct = default)
+    public async Task<Product> UpdateProductAsync(int id, string code, string name, string? description, decimal purchasePrice, decimal sellingPrice, bool isActive, IEnumerable<int>? categoryIds = null, CancellationToken ct = default)
     {
         var product = await _productRepository.GetByIdAsync(id, ct)
             ?? throw new DomainException($"Produkt s ID {id} nebyl nalezen.");
@@ -57,6 +63,12 @@ public class ProductService : IProductService
         }
 
         product.Update(normalizedCode, name, description, purchasePrice, sellingPrice, isActive);
+
+        if (categoryIds != null)
+        {
+            product.SetCategories(categoryIds);
+        }
+
         await _productRepository.UpdateAsync(product, ct);
         return product;
     }

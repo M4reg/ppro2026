@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Drevenka.Domain.Entities;
 using Drevenka.Domain.Exceptions;
 using Drevenka.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,14 +10,21 @@ namespace Drevenka.Web.Pages.Products;
 public class EditModel : PageModel
 {
     private readonly IProductService _productService;
+    private readonly ICategoryService _categoryService;
 
-    public EditModel(IProductService productService)
+    public EditModel(IProductService productService, ICategoryService categoryService)
     {
         _productService = productService;
+        _categoryService = categoryService;
     }
 
     [BindProperty]
     public ProductEditInputModel Input { get; set; } = new();
+
+    public IReadOnlyList<Category> AvailableCategories { get; private set; } = [];
+
+    [BindProperty]
+    public List<int> SelectedCategoryIds { get; set; } = [];
 
     public class ProductEditInputModel
     {
@@ -69,6 +77,9 @@ public class EditModel : PageModel
             IsActive = product.IsActive
         };
 
+        AvailableCategories = await _categoryService.GetAllCategoriesAsync();
+        SelectedCategoryIds = product.ProductCategories.Select(pc => pc.CategoryId).ToList();
+
         return Page();
     }
 
@@ -76,6 +87,7 @@ public class EditModel : PageModel
     {
         if (!ModelState.IsValid)
         {
+            AvailableCategories = await _categoryService.GetAllCategoriesAsync();
             return Page();
         }
 
@@ -88,7 +100,8 @@ public class EditModel : PageModel
                 Input.Description,
                 Input.PurchasePrice,
                 Input.SellingPrice,
-                Input.IsActive
+                Input.IsActive,
+                categoryIds: SelectedCategoryIds
             );
 
             TempData["SuccessMessage"] = $"Produkt '{product.Name}' byl úspěšně aktualizován.";
@@ -97,6 +110,7 @@ public class EditModel : PageModel
         catch (DomainException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
+            AvailableCategories = await _categoryService.GetAllCategoriesAsync();
             return Page();
         }
     }

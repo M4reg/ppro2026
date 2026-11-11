@@ -1,0 +1,65 @@
+@page "{id:int}"
+@model Drevenka.Web.Pages.Categories.EditModel
+@{
+    ViewData["Title"] = "Úprava kategorie";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <a asp-page="./Index">Kategorie produktů</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Úprava kategorie</span>
+</div>
+
+<div class="mb-4">
+    <h1 class="h2 fw-bold text-wood-dark mb-1">
+        <i class="bi bi-pencil-square text-wood-terracotta me-2"></i>Úprava kategorie
+    </h1>
+    <p class="text-muted small">Aktualizujte název, popis nebo stav dostupnosti kategorie.</p>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm p-4">
+            <form method="post">
+                <input type="hidden" asp-for="Input.Id" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm border-0 bg-danger-subtle text-danger-emphasis mb-3" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Name" class="form-label fw-bold text-wood-dark"></label>
+                    <input asp-for="Input.Name" class="form-control border-wood-sand" />
+                    <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Description" class="form-label fw-bold text-wood-dark"></label>
+                    <textarea asp-for="Input.Description" class="form-control border-wood-sand" rows="3"></textarea>
+                    <span asp-validation-for="Input.Description" class="text-danger small"></span>
+                </div>
+
+                <div class="form-check form-switch mb-4">
+                    <input class="form-check-input" type="checkbox" role="switch" asp-for="Input.IsActive" id="isActiveSwitch">
+                    <label class="form-check-label fw-semibold text-wood-dark" for="isActiveSwitch">
+                        Aktivní kategorie v nabídce
+                    </label>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <a asp-page="./Index" class="btn btn-outline-wood-pine">
+                        <i class="bi bi-arrow-left me-1"></i> Zpět na přehled
+                    </a>
+                    <button type="submit" class="btn btn-wood-pine px-4 fw-semibold shadow-sm">
+                        <i class="bi bi-check-lg me-1"></i> Uložit změny
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

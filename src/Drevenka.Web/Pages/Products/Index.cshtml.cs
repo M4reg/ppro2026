@@ -2,22 +2,29 @@ using Drevenka.Domain.Entities;
 using Drevenka.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Drevenka.Web.Pages.Products;
 
 public class IndexModel : PageModel
 {
     private readonly IProductService _productService;
+    private readonly ICategoryService _categoryService;
 
-    public IndexModel(IProductService productService)
+    public IndexModel(IProductService productService, ICategoryService categoryService)
     {
         _productService = productService;
+        _categoryService = categoryService;
     }
 
     public IReadOnlyList<Product> Products { get; private set; } = [];
+    public List<SelectListItem> CategoryOptions { get; private set; } = [];
 
     [BindProperty(SupportsGet = true)]
     public string? SearchTerm { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public int? CategoryId { get; set; }
 
     [BindProperty(SupportsGet = true)]
     public bool OnlyActive { get; set; } = false;
@@ -42,6 +49,7 @@ public class IndexModel : PageModel
 
     public bool HasActiveFilters =>
         !string.IsNullOrWhiteSpace(SearchTerm) ||
+        CategoryId.HasValue ||
         StatusFilter != "all" ||
         OnlyActive ||
         SortBy != "name_asc" ||
@@ -50,8 +58,16 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
+        var categories = await _categoryService.GetAllCategoriesAsync();
+        CategoryOptions = categories.Select(c => new SelectListItem
+        {
+            Value = c.Id.ToString(),
+            Text = c.Name,
+            Selected = CategoryId == c.Id
+        }).ToList();
+
         bool fetchOnlyActive = StatusFilter == "active" || (StatusFilter != "inactive" && OnlyActive);
-        var list = (await _productService.GetAllProductsAsync(SearchTerm, fetchOnlyActive)).ToList();
+        var list = (await _productService.GetAllProductsAsync(SearchTerm, CategoryId, fetchOnlyActive)).ToList();
 
         if (StatusFilter == "inactive")
         {
@@ -105,7 +121,7 @@ public class IndexModel : PageModel
             ErrorMessage = $"Chyba při deaktivaci produktu: {ex.Message}";
         }
 
-        return RedirectToPage(new { SearchTerm, OnlyActive });
+        return RedirectToPage(new { SearchTerm, CategoryId, OnlyActive });
     }
 
     public async Task<IActionResult> OnPostActivateAsync(int id)
@@ -132,6 +148,6 @@ public class IndexModel : PageModel
             ErrorMessage = $"Chyba při aktivaci produktu: {ex.Message}";
         }
 
-        return RedirectToPage(new { SearchTerm, OnlyActive });
+        return RedirectToPage(new { SearchTerm, CategoryId, OnlyActive });
     }
 }

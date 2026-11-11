@@ -1,0 +1,124 @@
+@page
+@model Drevenka.Web.Pages.Categories.IndexModel
+@{
+    ViewData["Title"] = "Kategorie produktů";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Kategorie produktů</span>
+</div>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1 fw-bold text-wood-dark">
+            <i class="bi bi-tags text-wood-terracotta me-2"></i>Kategorie produktů
+        </h1>
+        <p class="text-muted small mb-0">Správa kategorií a zařazení do nabídky e-shopu (vazba M:N pro více kategorií na produkt).</p>
+    </div>
+    <div>
+        <a asp-page="./Create" class="btn btn-wood-pine px-3 py-2 shadow-sm fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Nová kategorie
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 bg-success-subtle text-success-emphasis" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@Model.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 bg-danger-subtle text-danger-emphasis" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 250px;">Název kategorie</th>
+                    <th>Popis</th>
+                    <th class="text-center" style="width: 150px;">Počet produktů</th>
+                    <th class="text-center" style="width: 120px;">Stav</th>
+                    <th class="text-end" style="width: 180px;">Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Categories.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-3 d-block text-wood-terracotta mb-2"></i>
+                            Zatím nejsou vytvořeny žádné kategorie.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <tr class="@(!cat.IsActive ? "opacity-75 bg-light" : "")">
+                            <td>
+                                <strong class="text-wood-dark fs-6">
+                                    <i class="bi bi-tag-fill text-wood-terracotta me-1"></i>@cat.Name
+                                </strong>
+                            </td>
+                            <td class="text-muted small">
+                                @(string.IsNullOrWhiteSpace(cat.Description) ? "Bez popisu" : cat.Description)
+                            </td>
+                            <td class="text-center">
+                                <a asp-page="/Products/Index" asp-route-categoryId="@cat.Id" class="badge bg-wood-sand text-wood-dark text-decoration-none px-2 py-1">
+                                    @cat.ProductCategories.Count produktů
+                                </a>
+                            </td>
+                            <td class="text-center">
+                                @if (cat.IsActive)
+                                {
+                                    <span class="badge badge-active"><i class="bi bi-check2 me-1"></i>Aktivní</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary">Neaktivní</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a asp-page="./Edit" asp-route-id="@cat.Id" class="btn btn-sm btn-outline-wood-pine py-1 px-2" title="Upravit kategorii">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    @if (cat.IsActive)
+                                    {
+                                        <form method="post" asp-page-handler="Deactivate" asp-route-id="@cat.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Deaktivovat kategorii" onclick="return confirm('Opravdu chcete deaktivovat kategorii @cat.Name?');">
+                                                <i class="bi bi-pause-fill"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="Activate" asp-route-id="@cat.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-success py-1 px-2" title="Aktivovat kategorii">
+                                                <i class="bi bi-play-fill"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

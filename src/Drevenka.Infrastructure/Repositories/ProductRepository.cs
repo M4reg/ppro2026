@@ -16,22 +16,42 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        return await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id, ct);
+        return await _dbContext.Products
+            .Include(p => p.ProductCategories)
+            .ThenInclude(pc => pc.Category)
+            .Include(p => p.StockItems)
+            .ThenInclude(si => si.Warehouse)
+            .FirstOrDefaultAsync(p => p.Id == id, ct);
     }
 
     public async Task<Product?> GetByCodeAsync(string code, CancellationToken ct = default)
     {
         var normalized = code.Trim().ToUpperInvariant();
-        return await _dbContext.Products.FirstOrDefaultAsync(p => p.Code == normalized, ct);
+        return await _dbContext.Products
+            .Include(p => p.ProductCategories)
+            .ThenInclude(pc => pc.Category)
+            .Include(p => p.StockItems)
+            .ThenInclude(si => si.Warehouse)
+            .FirstOrDefaultAsync(p => p.Code == normalized, ct);
     }
 
-    public async Task<IReadOnlyList<Product>> GetAllAsync(string? searchTerm = null, bool onlyActive = false, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Product>> GetAllAsync(string? searchTerm = null, int? categoryId = null, bool onlyActive = false, CancellationToken ct = default)
     {
-        IQueryable<Product> query = _dbContext.Products.AsNoTracking();
+        IQueryable<Product> query = _dbContext.Products
+            .Include(p => p.ProductCategories)
+            .ThenInclude(pc => pc.Category)
+            .Include(p => p.StockItems)
+            .ThenInclude(si => si.Warehouse)
+            .AsNoTracking();
 
         if (onlyActive)
         {
             query = query.Where(p => p.IsActive);
+        }
+
+        if (categoryId.HasValue && categoryId.Value > 0)
+        {
+            query = query.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))

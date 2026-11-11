@@ -18,7 +18,10 @@
         </h1>
         <p class="text-muted small mb-0">Kompletní sortimentní evidence a správa cen položek dílny Dřevěnka s.r.o.</p>
     </div>
-    <div>
+    <div class="d-flex gap-2">
+        <a asp-page="/Categories/Index" class="btn btn-outline-wood-pine px-3 py-2 fw-semibold">
+            <i class="bi bi-tags me-1"></i> Správa kategorií
+        </a>
         <a asp-page="./Create" class="btn btn-wood-pine px-3 py-2 shadow-sm fw-semibold">
             <i class="bi bi-plus-circle me-1"></i> Nová položka
         </a>
@@ -68,12 +71,21 @@
                 <div class="row g-2 align-items-center">
                     <div class="col-12 col-sm-6 col-md-3">
                         <label class="form-label extra-small text-uppercase fw-bold text-wood-dark mb-1">
+                            <i class="bi bi-tag me-1"></i>Kategorie
+                        </label>
+                        <select asp-for="CategoryId" asp-items="Model.CategoryOptions" class="form-select form-select-sm border-wood-sand">
+                            <option value="">Všechny kategorie</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-2">
+                        <label class="form-label extra-small text-uppercase fw-bold text-wood-dark mb-1">
                             <i class="bi bi-toggle2-on me-1"></i>Stav nabídky
                         </label>
                         <select asp-for="StatusFilter" class="form-select form-select-sm border-wood-sand">
                             <option value="all">Všechny položky</option>
-                            <option value="active">Pouze aktivní v nabídce</option>
-                            <option value="inactive">Pouze neaktivní / vyřazené</option>
+                            <option value="active">Pouze aktivní</option>
+                            <option value="inactive">Pouze neaktivní</option>
                         </select>
                     </div>
 
@@ -91,17 +103,17 @@
                         </select>
                     </div>
 
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <label class="form-label extra-small text-uppercase fw-bold text-wood-dark mb-1">Cena od (Kč)</label>
+                    <div class="col-6 col-sm-3 col-md-1">
+                        <label class="form-label extra-small text-uppercase fw-bold text-wood-dark mb-1">Od (Kč)</label>
                         <input type="number" step="10" min="0" asp-for="MinPrice" class="form-control form-control-sm border-wood-sand text-end font-monospace" placeholder="0" />
                     </div>
 
-                    <div class="col-6 col-sm-4 col-md-2">
-                        <label class="form-label extra-small text-uppercase fw-bold text-wood-dark mb-1">Cena do (Kč)</label>
+                    <div class="col-6 col-sm-3 col-md-1">
+                        <label class="form-label extra-small text-uppercase fw-bold text-wood-dark mb-1">Do (Kč)</label>
                         <input type="number" step="10" min="0" asp-for="MaxPrice" class="form-control form-control-sm border-wood-sand text-end font-monospace" placeholder="max" />
                     </div>
 
-                    <div class="col-12 col-sm-4 col-md-2 d-flex gap-2 align-items-end pt-sm-4">
+                    <div class="col-12 col-sm-6 col-md-2 d-flex gap-2 align-items-end pt-sm-4">
                         <button type="submit" class="btn btn-wood-terracotta btn-sm flex-grow-1 fw-semibold shadow-sm" title="Aplikovat vybrané filtry">
                             <i class="bi bi-funnel-fill me-1"></i> Filtrovat
                         </button>
@@ -159,7 +171,7 @@ else
                 <thead>
                     <tr>
                         <th style="width: 130px;">Kód (SKU)</th>
-                        <th>Název a popis</th>
+                        <th>Název, kategorie a popis</th>
                         <th class="text-end" style="width: 140px;">Nákupní cena</th>
                         <th class="text-end" style="width: 150px;">Prodejní cena</th>
                         <th class="text-end" style="width: 120px;">Marže</th>
@@ -180,6 +192,17 @@ else
                                 <a asp-page="./Details" asp-route-id="@item.Id" class="fw-bold text-decoration-none text-wood-dark d-block">
                                     @item.Name
                                 </a>
+                                @if (item.ProductCategories.Any())
+                                {
+                                    <div class="d-flex flex-wrap gap-1 my-1">
+                                        @foreach (var pc in item.ProductCategories)
+                                        {
+                                            <span class="badge bg-white text-wood-dark border border-wood-sand" style="font-size: 0.72rem; font-weight: 500;">
+                                                <i class="bi bi-tag-fill text-wood-terracotta me-1"></i>@pc.Category.Name
+                                            </span>
+                                        }
+                                    </div>
+                                }
                                 @if (!string.IsNullOrWhiteSpace(item.Description))
                                 {
                                     <span class="text-muted small text-truncate d-block" style="max-width: 380px;">@item.Description</span>
@@ -252,6 +275,17 @@ else
                         <h5 class="card-title fw-bold mb-1">
                             <a asp-page="./Details" asp-route-id="@item.Id" class="text-decoration-none text-wood-dark">@item.Name</a>
                         </h5>
+                        @if (item.ProductCategories.Any())
+                        {
+                            <div class="d-flex flex-wrap gap-1 my-2">
+                                @foreach (var pc in item.ProductCategories)
+                                {
+                                    <span class="badge bg-wood-sand text-wood-dark" style="font-size: 0.72rem; font-weight: 500;">
+                                        <i class="bi bi-tag-fill text-wood-terracotta me-1"></i>@pc.Category.Name
+                                    </span>
+                                }
+                            </div>
+                        }
                         @if (!string.IsNullOrWhiteSpace(item.Description))
                         {
                             <p class="card-text text-muted small mb-3">@item.Description</p>

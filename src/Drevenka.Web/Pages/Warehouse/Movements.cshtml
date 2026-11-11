@@ -1,0 +1,157 @@
+@page
+@model Drevenka.Web.Pages.WarehousePages.MovementsModel
+@using Drevenka.Domain.Entities
+@{
+    ViewData["Title"] = "Historie skladových pohybů";
+}
+
+<!-- Drobečková navigace -->
+<div class="custom-breadcrumb-bar">
+    <a asp-page="/Index"><i class="bi bi-house-door me-1"></i> Sklad Dřevěnka</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <a asp-page="./Index">Přehled skladu</a>
+    <span class="sep"><i class="bi bi-chevron-right"></i></span>
+    <span class="current">Auditní historie pohybů</span>
+</div>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1 fw-bold text-wood-dark">
+            <i class="bi bi-clock-history text-wood-terracotta me-2"></i>Auditní stopa skladových pohybů
+        </h1>
+        <p class="text-muted small mb-0">Neměnný záznam každé změny stavu zásob (kdo, kdy, z jakého skladu, jaké množství a z jakého důvodu přijal či vydal).</p>
+    </div>
+    <div>
+        <a asp-page="./Operations" class="btn btn-wood-pine px-3 py-2 shadow-sm fw-semibold">
+            <i class="bi bi-plus-lg me-1"></i> Zaznamenat pohyb
+        </a>
+    </div>
+</div>
+
+<!-- Filtrační lišta -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-5">
+                <select asp-for="ProductId" asp-items="Model.ProductOptions" class="form-select border-wood-sand">
+                    <option value="">Všechny produkty sortimentu</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-5">
+                <select asp-for="WarehouseId" asp-items="Model.WarehouseOptions" class="form-select border-wood-sand">
+                    <option value="">Všechny sklady (HK i Garáž)</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-wood-terracotta w-100 fw-semibold">
+                    <i class="bi bi-filter me-1"></i> Filtrovat
+                </button>
+                @if (Model.ProductId.HasValue || Model.WarehouseId.HasValue)
+                {
+                    <a asp-page="./Movements" class="btn btn-outline-secondary" title="Zrušit filtr">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabulka pohybů -->
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 150px;">Datum a čas</th>
+                    <th style="width: 140px;">Typ pohybu</th>
+                    <th>Produkt</th>
+                    <th style="width: 180px;">Sklad</th>
+                    <th class="text-end" style="width: 100px;">Změna</th>
+                    <th class="text-center" style="width: 140px;">Před ➔ Po</th>
+                    <th style="width: 160px;">Doklad / Ref.</th>
+                    <th>Odůvodnění / Poznámka</th>
+                    <th style="width: 130px;">Zapsal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Movements.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="bi bi-journal-x fs-2 d-block text-wood-terracotta mb-2"></i>
+                            Zatím nebyly zaznamenány žádné skladové pohyby.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var m in Model.Movements)
+                    {
+                        var isAddition = m.MovementType == StockMovementType.Receipt || m.MovementType == StockMovementType.TransferIn || (m.MovementType == StockMovementType.InventoryDiscrepancy && m.NewQuantity > m.PreviousQuantity);
+                        <tr>
+                            <td class="font-monospace small text-muted">
+                                @m.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")
+                            </td>
+                            <td>
+                                @switch (m.MovementType)
+                                {
+                                    case StockMovementType.Receipt:
+                                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                                            <i class="bi bi-box-arrow-in-down me-1"></i>Příjem
+                                        </span>
+                                        break;
+                                    case StockMovementType.Issue:
+                                        <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                            <i class="bi bi-box-arrow-up me-1"></i>Výdej
+                                        </span>
+                                        break;
+                                    case StockMovementType.TransferOut:
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                            <i class="bi bi-arrow-right-circle me-1"></i>Přesun (výdej)
+                                        </span>
+                                        break;
+                                    case StockMovementType.TransferIn:
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                            <i class="bi bi-arrow-left-circle me-1"></i>Přesun (příjem)
+                                        </span>
+                                        break;
+                                    case StockMovementType.InventoryDiscrepancy:
+                                        <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
+                                            <i class="bi bi-clipboard-check me-1"></i>Inventura
+                                        </span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <strong class="text-wood-dark d-block">@m.Product.Name</strong>
+                                <span class="badge badge-sku">@m.Product.Code</span>
+                            </td>
+                            <td class="small fw-semibold text-wood-dark">
+                                @m.Warehouse.Name
+                            </td>
+                            <td class="text-end font-monospace fs-6 fw-bold @(isAddition ? "text-success" : "text-danger")">
+                                @(isAddition ? "+" : "-")@m.Quantity ks
+                            </td>
+                            <td class="text-center font-monospace small text-muted">
+                                @m.PreviousQuantity ➔ <strong class="text-wood-dark">@m.NewQuantity</strong> ks
+                            </td>
+                            <td class="font-monospace small text-wood-dark">
+                                @(string.IsNullOrWhiteSpace(m.ReferenceNumber) ? "–" : m.ReferenceNumber)
+                            </td>
+                            <td class="small text-muted">
+                                @(string.IsNullOrWhiteSpace(m.Note) ? "–" : m.Note)
+                            </td>
+                            <td class="small text-wood-dark">
+                                <i class="bi bi-person me-1 text-muted"></i>@m.PerformedBy
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

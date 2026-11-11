@@ -54,8 +54,38 @@
 
                     <div>
                         <label asp-for="Input.Description" class="form-label fw-semibold text-wood-dark extra-small text-uppercase"></label>
-                        <textarea asp-for="Input.Description" class="form-control border-wood-sand" rows="4"></textarea>
+                        <textarea asp-for="Input.Description" class="form-control border-wood-sand" rows="3"></textarea>
                         <span asp-validation-for="Input.Description" class="text-danger small"></span>
+                    </div>
+
+                    <div>
+                        <label class="form-label fw-semibold text-wood-dark extra-small text-uppercase">
+                            <i class="bi bi-tags text-wood-terracotta me-1"></i>Zařazení do kategorií (M:N)
+                        </label>
+                        @if (Model.AvailableCategories.Any())
+                        {
+                            <div class="border border-wood-sand p-3 bg-wood-sand-subtle">
+                                <div class="row g-2">
+                                    @foreach (var cat in Model.AvailableCategories)
+                                    {
+                                        <div class="col-12 col-sm-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="SelectedCategoryIds" value="@cat.Id" id="cat_@cat.Id"
+                                                       @(Model.SelectedCategoryIds.Contains(cat.Id) ? "checked" : "") />
+                                                <label class="form-check-label small fw-semibold text-wood-dark" for="cat_@cat.Id">
+                                                    @cat.Name
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="form-text small">Produkt může patřit do více kategorií současně (např. „Pro nejmenší“ i „Dárky do 300 Kč“).</div>
+                        }
+                        else
+                        {
+                            <div class="text-muted small fst-italic">Zatím nejsou vytvořeny žádné kategorie. <a asp-page="/Categories/Create" target="_blank">Vytvořit novou kategorii</a></div>
+                        }
                     </div>
                 </div>
 

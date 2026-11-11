@@ -62,6 +62,27 @@
                     {
                         <p class="text-muted fst-italic mb-4">K tomuto produktu zatím nebyl zadán podrobný dílenský popis.</p>
                     }
+
+                    <div class="mb-4">
+                        <div class="fw-bold extra-small text-uppercase text-wood-dark mb-2">
+                            <i class="bi bi-tags text-wood-terracotta me-1"></i>Zařazené kategorie (M:N)
+                        </div>
+                        @if (Model.Product.ProductCategories.Any())
+                        {
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var pc in Model.Product.ProductCategories)
+                                {
+                                    <a asp-page="./Index" asp-route-categoryId="@pc.CategoryId" class="badge bg-white text-wood-dark border border-wood-sand text-decoration-none px-3 py-2 fs-6">
+                                        <i class="bi bi-tag-fill text-wood-terracotta me-1"></i>@pc.Category.Name
+                                    </a>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted small fst-italic">Produkt zatím není zařazen do žádné kategorie.</span>
+                        }
+                    </div>
                 </div>
 
                 <div class="border p-3 bg-wood-sand-subtle border-wood-sand mt-4">

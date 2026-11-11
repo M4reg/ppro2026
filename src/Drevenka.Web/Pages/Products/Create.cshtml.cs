@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Drevenka.Domain.Entities;
 using Drevenka.Domain.Exceptions;
 using Drevenka.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,14 +10,21 @@ namespace Drevenka.Web.Pages.Products;
 public class CreateModel : PageModel
 {
     private readonly IProductService _productService;
+    private readonly ICategoryService _categoryService;
 
-    public CreateModel(IProductService productService)
+    public CreateModel(IProductService productService, ICategoryService categoryService)
     {
         _productService = productService;
+        _categoryService = categoryService;
     }
 
     [BindProperty]
     public ProductInputModel Input { get; set; } = new();
+
+    public IReadOnlyList<Category> AvailableCategories { get; private set; } = [];
+
+    [BindProperty]
+    public List<int> SelectedCategoryIds { get; set; } = [];
 
     public class ProductInputModel
     {
@@ -31,28 +39,30 @@ public class CreateModel : PageModel
         public string Name { get; set; } = string.Empty;
 
         [StringLength(2000, ErrorMessage = "Popis nesmí překročit 2000 znaků.")]
-        [Display(Name = "Popis")]
+        [Display(Name = "Popis položky")]
         public string? Description { get; set; }
 
         [Required(ErrorMessage = "Nákupní cena je povinná.")]
         [Range(0, 1000000, ErrorMessage = "Nákupní cena nesmí být záporná.")]
-        [Display(Name = "Nákupní cena (Kč)")]
+        [Display(Name = "Nákupní výrobní cena (Kč)")]
         public decimal PurchasePrice { get; set; }
 
         [Required(ErrorMessage = "Prodejní cena je povinná.")]
         [Range(0, 1000000, ErrorMessage = "Prodejní cena nesmí být záporná.")]
-        [Display(Name = "Prodejní cena (Kč)")]
+        [Display(Name = "Prodejní koncová cena (Kč)")]
         public decimal SellingPrice { get; set; }
     }
 
-    public void OnGet()
+    public async Task OnGetAsync()
     {
+        AvailableCategories = await _categoryService.GetAllCategoriesAsync(onlyActive: true);
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
+            AvailableCategories = await _categoryService.GetAllCategoriesAsync(onlyActive: true);
             return Page();
         }
 
@@ -63,7 +73,8 @@ public class CreateModel : PageModel
                 Input.Name,
                 Input.Description,
                 Input.PurchasePrice,
-                Input.SellingPrice
+                Input.SellingPrice,
+                categoryIds: SelectedCategoryIds
             );
 
             TempData["SuccessMessage"] = $"Produkt '{product.Name}' (kód {product.Code}) byl úspěšně vytvořen.";
@@ -72,6 +83,7 @@ public class CreateModel : PageModel
         catch (DomainException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
+            AvailableCategories = await _categoryService.GetAllCategoriesAsync(onlyActive: true);
             return Page();
         }
     }

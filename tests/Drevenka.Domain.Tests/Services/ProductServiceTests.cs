@@ -24,10 +24,14 @@ public class ProductServiceTests
             return Task.FromResult(Items.FirstOrDefault(p => p.Code == norm));
         }
 
-        public Task<IReadOnlyList<Product>> GetAllAsync(string? searchTerm = null, bool onlyActive = false, CancellationToken ct = default)
+        public Task<IReadOnlyList<Product>> GetAllAsync(string? searchTerm = null, int? categoryId = null, bool onlyActive = false, CancellationToken ct = default)
         {
             IEnumerable<Product> q = Items;
             if (onlyActive) q = q.Where(x => x.IsActive);
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                q = q.Where(x => x.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
+            }
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var s = searchTerm.ToLower();
@@ -124,5 +128,20 @@ public class ProductServiceTests
         // Assert
         await act.Should().ThrowAsync<DomainException>()
             .WithMessage("*již existuje u jiné položky*");
+    }
+
+    [Fact]
+    public async Task CreateProductAsync_WithCategoryIds_ShouldAssignCategories()
+    {
+        // Arrange
+        var repo = new FakeProductRepository();
+        var service = new ProductService(repo);
+
+        // Act
+        var product = await service.CreateProductAsync("KOS-001", "Kostky", null, 100m, 200m, categoryIds: [5, 10]);
+
+        // Assert
+        product.ProductCategories.Should().HaveCount(2);
+        product.ProductCategories.Select(pc => pc.CategoryId).Should().BeEquivalentTo([5, 10]);
     }
 }
