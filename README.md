@@ -147,10 +147,10 @@ erDiagram
 | :--- | :---: | :--- |
 | **Třívrstvá architektura** | **Splněno** | Přísně oddělená doména (`Drevenka.Domain`), datová vrstva (`Drevenka.Infrastructure`) a prezentační vrstva (`Drevenka.Web`) se závislostmi jedním směrem. |
 | **Relační databáze v Dockeru** | **Splněno** | Databáze PostgreSQL 16 kontejnerizována v `docker-compose.yml` se zdravotní kontrolou (healthcheck). |
-| **Databázové migrace** | **Splněno** | Verzované migrace řízené přes Entity Framework Core (`20261006145553_InitialCreate`, `20261104160000_AddCategoriesAndProductCategory`, `20261104170000_AddWarehousesAndStockMovements`). |
-| **Minimálně 5 entit** | **Splněno** (6 z 5: `Product`, `Category`, `ProductCategory`, `Warehouse`, `StockItem`, `StockMovement`) | Plně implementováno a perzistováno 6 entit pokrývajících produkty, kategorie, sklady, stav zásob a auditní historii pohybů. |
+| **Databázové migrace** | **Splněno** | Verzované migrace řízené přes Entity Framework Core (`20261006145553_InitialCreate`, `20261104160000_AddCategoriesAndProductCategory`, `20261104170000_AddWarehousesAndStockMovements`, `20261111170000_AddCustomersAndOrders`). |
+| **Minimálně 5 entit** | **Splněno** (9 z 5: `Product`, `Category`, `ProductCategory`, `Warehouse`, `StockItem`, `StockMovement`, `Customer`, `Order`, `OrderItem`) | Plně implementováno a perzistováno 9 entit pokrývajících produkty, kategorie, sklady, stav zásob, auditní historii pohybů, zákazníky a zákaznické objednávky. |
 | **Alespoň jedna vazba M:N** | **Splněno** | Plně implementována vazba M:N `Product` ↔ `Category` přes vazební entitu `ProductCategory` (produkt může patřit do více kategorií současně, kategorie sdružuje více produktů). |
-| **Automatizované testy** | **Splněno** | 31 automatizovaných jednotkových testů v `tests/Drevenka.Domain.Tests` pokrývajících doménová pravidla produktů, kategorií, služeb a relace M:N. |
+| **Automatizované testy** | **Splněno** | **79 automatizovaných testů** bez selhání: 75 jednotkových testů v `tests/Drevenka.Domain.Tests` pokrývajících pravidla produktů, kategorií, zákazníků, objednávek, skladových zásob i doménových služeb `OrderService` a `StockService` + 4 integrační testy v `tests/Drevenka.IntegrationTests` testující PostgreSQL schéma, integritní constrainty a transakční perzistenci objednávek. |
 | **Spuštění přes docker compose up**| **Splněno** | Celý systém (DB + Web) je sestavitelný a spustitelný jediným příkazem `docker compose up --build`. |
 | **Technická dokumentace** | **Splněno** | [README.md](file:///u:/ppro2026/README.md) slouží jako jediný zdroj pravdy a průběžně se aktualizuje. |
 | **Syntetická data bez hesel** | **Splněno** | Inicializační seeder automaticky vkládá 5 syntetických dřevěných hraček (káča, vláček, kostky, koník, pexeso); hesla nejsou uložena v kódu. |
@@ -188,6 +188,26 @@ dotnet run --project src/Drevenka.Web/Drevenka.Web.csproj
 ---
 
 ## 7. Deník změn a rozhodnutí (Changelog & Progress Log)
+
+- **2026-11-18 (Fáze 6: Doplnění integračních testů proti PostgreSQL a jednotkových testů doménových služeb):**
+  - **Integrační testy proti databázi (`Drevenka.IntegrationTests`)**:
+    - Vytvořen nový testovací projekt `tests/Drevenka.IntegrationTests` připojený k řešení `Drevenka.slnx`.
+    - Zavedena fixture `PostgreSqlDatabaseFixture` automaticky vytvářející testovací PostgreSQL schéma a aplikující verzované migrace EF Core.
+    - Implementovány integrační testy:
+      - `DatabaseSchemaIntegrationTests`: Ověřuje aplikaci všech 4 migrací a existenci všech 9 relačních tabulek v PostgreSQL.
+      - `OrderAndCustomerIntegrationTests`: Testuje end-to-end relační uložení zákazníka, produktů s M:N kategoriemi a objednávky s položkami a historickou cenou.
+      - `StockConstraintIntegrationTests`: Ověřuje integritní omezení `ck_stock_items_quantity_on_hand` (odmítnutí záporného stavu na úrovni DB engine) a auditní stopu v `stock_movements`.
+  - **Jednotkové testy aplikačních služeb (`Drevenka.Domain.Tests`)**:
+    - Doplněna sada testů pro `OrderService` (ověření disponibilních zásob, automatické odmítnutí při nedostatku zásob vyhozením `InsufficientStockException`, okamžitá rezervace, fyzický výdej a zrušení objednávky).
+    - Doplněna sada testů pro `StockService` (příjem, výdej, meziskladové přesuny, inventurní vyrovnání).
+    - Doplněny jednotkové testy pro entity `StockItem` a `StockMovement`.
+    - Celkový počet testů navýšen na **79 testů** (75 jednotkových + 4 integrační) se 100% úspěšností.
+
+- **2026-11-11 (Fáze 5: Implementace zákazníků, objednávek a nákupního procesu):**
+  - **Doménový model**: Implementovány entity `Customer`, `Order`, `OrderItem` a výčet `OrderStatus`.
+  - **Repozitáře a služby**: Vytvořena rozhraní `ICustomerRepository`, `IOrderRepository` a doménová služba `OrderService`.
+  - **Migrace**: Vytvořena verzovaná migrace `20261111170000_AddCustomersAndOrders`.
+  - **Uživatelské rozhraní**: Zavedeny stránky `Pages/Orders` a `Pages/Customers`.
 
 - **2026-11-11 (Fáze 4: Implementace skladů, skladových zásob a auditní historie pohybů):**
   - **Doménový model**: Implementovány entity `Warehouse`, `StockItem` (fyzická zásoba, rezervace, disponibilní množství, minimální bezpečné zásoby) a `StockMovement` (auditní log pohybů s typy `StockMovementType`: příjem, výdej, převod, inventurní vyrovnání).

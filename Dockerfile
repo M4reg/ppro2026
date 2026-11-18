@@ -10,6 +10,7 @@ COPY src/Drevenka.Domain/*.csproj ./src/Drevenka.Domain/
 COPY src/Drevenka.Infrastructure/*.csproj ./src/Drevenka.Infrastructure/
 COPY src/Drevenka.Web/*.csproj ./src/Drevenka.Web/
 COPY tests/Drevenka.Domain.Tests/*.csproj ./tests/Drevenka.Domain.Tests/
+COPY tests/Drevenka.IntegrationTests/*.csproj ./tests/Drevenka.IntegrationTests/
 
 RUN dotnet restore ./src/Drevenka.Web/Drevenka.Web.csproj
 
