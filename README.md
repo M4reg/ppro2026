@@ -152,7 +152,7 @@ erDiagram
 | **Alespoň jedna vazba M:N** | **Splněno** | Plně implementována vazba M:N `Product` ↔ `Category` přes vazební entitu `ProductCategory` (produkt může patřit do více kategorií současně, kategorie sdružuje více produktů). |
 | **Automatizované testy** | **Splněno** | **79 automatizovaných testů** bez selhání: 75 jednotkových testů v `tests/Drevenka.Domain.Tests` pokrývajících pravidla produktů, kategorií, zákazníků, objednávek, skladových zásob i doménových služeb `OrderService` a `StockService` + 4 integrační testy v `tests/Drevenka.IntegrationTests` testující PostgreSQL schéma, integritní constrainty a transakční perzistenci objednávek. |
 | **Spuštění přes docker compose up**| **Splněno** | Celý systém (DB + Web) je sestavitelný a spustitelný jediným příkazem `docker compose up --build`. |
-| **Technická dokumentace** | **Splněno** | [README.md](file:///u:/ppro2026/README.md) slouží jako jediný zdroj pravdy a průběžně se aktualizuje. |
+| **Technická dokumentace** | **Splněno** | Kompletní semestrální dokumentace dle osnovy PPRO v [docs/dokumentace.md](file:///E:/UHK/PPRO/ppro2026/docs/dokumentace.md) a souhrnné [README.md](file:///E:/UHK/PPRO/ppro2026/README.md). |
 | **Syntetická data bez hesel** | **Splněno** | Inicializační seeder automaticky vkládá 5 syntetických dřevěných hraček (káča, vláček, kostky, koník, pexeso); hesla nejsou uložena v kódu. |
 
 ---
@@ -160,7 +160,7 @@ erDiagram
 ## 6. Provoz a spuštění projektu
 
 ### Požadavky
-- .NET 10 SDK (pro lokální vývoj a testy)
+- .NET 9 SDK (pro lokální vývoj a testy)
 - Docker & Docker Compose (pro kontejnerizovaný běh)
 - Git
 
@@ -188,6 +188,17 @@ dotnet run --project src/Drevenka.Web/Drevenka.Web.csproj
 ---
 
 ## 7. Deník změn a rozhodnutí (Changelog & Progress Log)
+
+- **2026-11-21 (Dokumentace projektu, oddíl požadavků klienta a ladění UI navigace):**
+  - **Technická a semestrální dokumentace (`docs/dokumentace.md`)**:
+    - Zpracována ucelená dokumentace semestrálního projektu dle oficiální osnovy a zadání PPRO (oddíly 1 až 10).
+    - Vytvořen oddíl 2 (Návrhová rozhodnutí R1–R10) a oddíl 3 (Změny požadované klientem a vyučujícím Z1–Z10) zachycující průběžný vývoj systému.
+    - Zpracován podrobný protokol o zacyklení (analýza chyb migrací PostgreSQL vs SQLite) a přiznání práce s AI nástroji.
+  - **Uživatelské rozhraní a navigace**:
+    - Odstraněn těžkopádný rámeček okolo statusu „Sklad online“ v hlavním navigačním pruhu, nahrazeno jemným workshop štítkem.
+    - Opraveno zalamování ikonek v navigačním menu: implementováno `display: inline-flex`, `align-items: center` a `white-space: nowrap`, ikony se již neodtrhávají od textových popisků.
+    - Implementováno automatické zavírání responzivního hamburger menu po kliknutí na libovolný odkaz v mobilním zobrazení.
+    - Vyčištěny nadbytečné pomlčky a akademické zkratky typu „(M:N)“ z uživatelského rozhraní.
 
 - **2026-11-18 (Fáze 6: Doplnění integračních testů proti PostgreSQL a jednotkových testů doménových služeb):**
   - **Integrační testy proti databázi (`Drevenka.IntegrationTests`)**:

@@ -98,6 +98,17 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 2px;
   border-bottom: 2px solid transparent;
   transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.navbar-wood .nav-link i {
+  display: inline-block;
+  line-height: 1;
+  font-size: 1rem;
+  margin-right: 0.45rem;
+  flex-shrink: 0;
 }
 
 .navbar-wood .nav-link:hover {
@@ -113,7 +124,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Mobilní navigace (Hamburger menu) - čisté zarovnání a plné popisky */
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
   .navbar-wood .navbar-collapse {
     background-color: var(--wood-pine);
     padding: 1rem 0.75rem 0.75rem 0.75rem;
@@ -124,6 +135,8 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
   }
   .navbar-wood .nav-link {
+    display: flex;
+    align-items: center;
     padding: 0.65rem 1rem !important;
     margin-bottom: 0.25rem;
     border-bottom: none !important;
