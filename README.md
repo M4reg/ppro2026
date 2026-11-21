@@ -152,7 +152,7 @@ erDiagram
 | **Alespoň jedna vazba M:N** | **Splněno** | Plně implementována vazba M:N `Product` ↔ `Category` přes vazební entitu `ProductCategory` (produkt může patřit do více kategorií současně, kategorie sdružuje více produktů). |
 | **Automatizované testy** | **Splněno** | **79 automatizovaných testů** bez selhání: 75 jednotkových testů v `tests/Drevenka.Domain.Tests` pokrývajících pravidla produktů, kategorií, zákazníků, objednávek, skladových zásob i doménových služeb `OrderService` a `StockService` + 4 integrační testy v `tests/Drevenka.IntegrationTests` testující PostgreSQL schéma, integritní constrainty a transakční perzistenci objednávek. |
 | **Spuštění přes docker compose up**| **Splněno** | Celý systém (DB + Web) je sestavitelný a spustitelný jediným příkazem `docker compose up --build`. |
-| **Technická dokumentace** | **Splněno** | Kompletní semestrální dokumentace dle osnovy PPRO v [docs/dokumentace.md](file:///E:/UHK/PPRO/ppro2026/docs/dokumentace.md) a souhrnné [README.md](file:///E:/UHK/PPRO/ppro2026/README.md). |
+| **Technická dokumentace** | **Splněno** | Kompletní semestrální dokumentace ve Wordu [docs/PPRO-dokumentace-sablona-v1.docx](file:///E:/UHK/PPRO/ppro2026/docs/PPRO-dokumentace-sablona-v1.docx) dle šablony PPRO i v Markdownu [docs/dokumentace.md](file:///E:/UHK/PPRO/ppro2026/docs/dokumentace.md). |
 | **Syntetická data bez hesel** | **Splněno** | Inicializační seeder automaticky vkládá 5 syntetických dřevěných hraček (káča, vláček, kostky, koník, pexeso); hesla nejsou uložena v kódu. |
 
 ---
